@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:chatapp/app_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
@@ -25,8 +27,8 @@ class ApiService {
       Map<String, String>? body}) async {
     try {
       String url = AppConfig.baseUrl + endPoint;
-      var response =
-          await http.post(Uri.parse(url), headers: headers ?? {}, body: body);
+      var response = await http.post(Uri.parse(url),
+          headers: headers ?? {}, body: jsonEncode(body));
       if (response.statusCode == 200) {
         return response;
       } else {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatScreen extends StatefulWidget {
   final String userName;
@@ -12,14 +13,58 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final List<String> _messages = [];
+  late IO.Socket socket;
+
+  @override
+  void initState() {
+    super.initState();
+    _connectToSocket();
+  }
+
+  void _connectToSocket() {
+   
+    socket = IO.io('http://192.168.100.126:3000', <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': false,
+    });
+
+    
+    socket.connect();
+      
+   
+
+   
+    socket.on('chat_message', (data) {
+      setState(() {
+        _messages.add(data);
+      });
+    });
+
+   
+    socket.onDisconnect((_) {
+      print('Disconnected from server');
+    });
+  }
 
   void _sendMessage() {
     if (_messageController.text.isNotEmpty) {
+      String message = _messageController.text.trim();
+
+     
+      socket.emit('chat_message', message);
+
       setState(() {
-        _messages.add(_messageController.text);
-        _messageController.clear();
+        _messages
+            .add(message); // Add message to local list for immediate display
+        _messageController.clear(); // Clear input field
       });
     }
+  }
+
+  @override
+  void dispose() {
+    socket.dispose(); // Dispose of socket connection when done
+    super.dispose();
   }
 
   @override
@@ -48,11 +93,13 @@ class _ChatScreenState extends State<ChatScreen> {
                   String message = _messages[index];
 
                   // Split the message at 10 characters
-                  String firstLine = message.length > 10 ? message.substring(0, 10) : message;
-                  String remainingMessage = message.length > 10 ? message.substring(10) : '';
+                  String firstLine =
+                      message.length > 10 ? message.substring(0, 10) : message;
+                  String remainingMessage =
+                      message.length > 10 ? message.substring(10) : '';
 
                   return Align(
-                    alignment: Alignment.centerRight, 
+                    alignment: Alignment.centerRight,
                     child: Container(
                       margin: const EdgeInsets.symmetric(vertical: 4.0),
                       padding: const EdgeInsets.symmetric(
@@ -62,7 +109,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         borderRadius: BorderRadius.circular(12.0),
                       ),
                       constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.75, // Limit message width
+                        maxWidth: MediaQuery.of(context).size.width *
+                            0.75, // Limit message width
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -70,18 +118,15 @@ class _ChatScreenState extends State<ChatScreen> {
                           // First line (up to 10 characters)
                           Text(
                             firstLine,
-                            style: TextStyle(
-                              color: Colors.black87,
-                            ),
-                            overflow: TextOverflow.ellipsis, // Handles overflow in the first line
+                            style: TextStyle(color: Colors.black87),
+                            overflow: TextOverflow
+                                .ellipsis, // Handles overflow in the first line
                           ),
                           // Remaining message (next lines)
                           if (remainingMessage.isNotEmpty)
                             Text(
                               remainingMessage,
-                              style: TextStyle(
-                                color: Colors.black87,
-                              ),
+                              style: TextStyle(color: Colors.black87),
                             ),
                         ],
                       ),

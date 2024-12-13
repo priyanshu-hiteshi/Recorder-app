@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:chatapp/app_config.dart';
 import 'package:chatapp/helper/end_points.dart';
 import 'package:chatapp/helper/local_point.dart';
+import 'package:chatapp/screens/user-helper/user_fetch_function.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'chat_screen.dart';
@@ -21,47 +22,19 @@ class _UsersState extends State<Users> {
   @override
   void initState() {
     super.initState();
-    _fetchUsers();
+    _loadUsers();
   }
 
-  // Fetch users from the API
-  Future<void> _fetchUsers() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString(LocalPoint.authToken); // Retrieve the token
-
-    if (token == null) {
-      // Handle the case when there is no token
-      print("No token found. Please login.");
+  Future<void> _loadUsers() async {
+    try {
+      final users = await UserFetchFunction.fetchUsers();
       setState(() {
+        userList = users;
         isLoading = false;
       });
-      return;
-    }
-
-    try {
-      final response = await http.get(
-        Uri.parse('${AppConfig.baseUrl}${EndPoints.users}'),
-        headers: {
-          'Authorization': 'Bearer $token', // Pass the token as a Bearer token
-        },
-      ).timeout(const Duration(seconds: 10)); // Timeout after 10 seconds
-
-      if (response.statusCode == 200) {
-        setState(() {
-          userList = json.decode(response.body); // Parse the response body
-          print(userList); // For debugging
-          isLoading = false;
-        });
-      } else {
-        // Handle non-200 response
-        print("Failed to load users: ${response.statusCode}");
-        setState(() {
-          isLoading = false;
-        });
-      }
     } catch (e) {
-      // Handle any exceptions that occur during the API call
-      print("Error during API request: $e");
+      // Handle errors during user fetching
+      print("Error loading users: $e");
       setState(() {
         isLoading = false;
       });
