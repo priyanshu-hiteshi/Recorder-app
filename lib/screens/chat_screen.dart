@@ -1,10 +1,14 @@
+import 'package:chatapp/models/messages_modal.dart';
+import 'package:chatapp/screens/fetch-messages-helper/fetch_messages.dart';
 import 'package:flutter/material.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import '../helper/end_points.dart';
+import '../models/messages_modal.dart'; // Import your Messages model
 
 class ChatScreen extends StatefulWidget {
   final String userName;
+  final int userId; // The userId of the current user
 
-  const ChatScreen({super.key, required this.userName});
+  const ChatScreen({super.key, required this.userName, required this.userId});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -12,129 +16,102 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
-  final List<String> _messages = [];
-  late IO.Socket socket;
+  List<Messages> _messages = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _connectToSocket();
+    _fetchMessages();
   }
 
-  void _connectToSocket() {
-   
-    socket = IO.io('http://192.168.100.126:3000', <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': false,
-    });
-
-    
-    socket.connect();
-      
-   
-
-   
-    socket.on('chat_message', (data) {
+  Future<void> _fetchMessages() async {
+    try {
+      final response = await FetchMessages.fetchMessage();
       setState(() {
-        _messages.add(data);
+        _messages = response.map((e) => Messages.fromJson(e)).toList();
+        _isLoading = false;
       });
-    });
-
-   
-    socket.onDisconnect((_) {
-      print('Disconnected from server');
-    });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print("Error fetching messages: $e");
+    }
   }
 
   void _sendMessage() {
     if (_messageController.text.isNotEmpty) {
-      String message = _messageController.text.trim();
-
-     
-      socket.emit('chat_message', message);
-
       setState(() {
-        _messages
-            .add(message); // Add message to local list for immediate display
-        _messageController.clear(); // Clear input field
+        // Add the new message to the message list
+        _messages.add(Messages(
+          id: DateTime.now().millisecondsSinceEpoch,
+          content: _messageController.text,
+          senderId: widget.userId,
+          recipientId: null, // Update based on your logic
+          roomId: null, // Update based on your logic
+          senderInfo: SenderInfo(id: widget.userId, name: widget.userName, email: ""),
+        ));
+        _messageController.clear();
       });
     }
-  }
-
-  @override
-  void dispose() {
-    socket.dispose(); // Dispose of socket connection when done
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.userName}'),
+        title: Text(widget.userName),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
       body: Column(
         children: [
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16.0),
-                  topRight: Radius.circular(16.0),
-                ),
-              ),
-              child: ListView.builder(
-                padding: const EdgeInsets.all(8.0),
-                itemCount: _messages.length,
-                itemBuilder: (context, index) {
-                  String message = _messages[index];
-
-                  // Split the message at 10 characters
-                  String firstLine =
-                      message.length > 10 ? message.substring(0, 10) : message;
-                  String remainingMessage =
-                      message.length > 10 ? message.substring(10) : '';
-
-                  return Align(
-                    alignment: Alignment.centerRight,
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: 4.0),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10.0, horizontal: 14.0),
-                      decoration: BoxDecoration(
-                        color: Colors.lightBlue[100], // Light blue background
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width *
-                            0.75, // Limit message width
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          // First line (up to 10 characters)
-                          Text(
-                            firstLine,
-                            style: TextStyle(color: Colors.black87),
-                            overflow: TextOverflow
-                                .ellipsis, // Handles overflow in the first line
-                          ),
-                          // Remaining message (next lines)
-                          if (remainingMessage.isNotEmpty)
-                            Text(
-                              remainingMessage,
-                              style: TextStyle(color: Colors.black87),
-                            ),
-                        ],
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(16.0),
+                        topRight: Radius.circular(16.0),
                       ),
                     ),
-                  );
-                },
-              ),
-            ),
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(8.0),
+                      itemCount: _messages.length,
+                      itemBuilder: (context, index) {
+                        Messages message = _messages[index];
+                        bool isCurrentUser = message.senderId == widget.userId;
+
+                        return Align(
+                          alignment: isCurrentUser
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(vertical: 4.0),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 10.0, horizontal: 14.0),
+                            decoration: BoxDecoration(
+                              color: isCurrentUser
+                                  ? Colors.lightBlue[100]
+                                  : Colors.grey[300],
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            constraints: BoxConstraints(
+                              maxWidth:
+                                  MediaQuery.of(context).size.width * 0.75,
+                            ),
+                            child: Text(
+                              message.content,
+                              style: const TextStyle(color: Colors.black87),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
           ),
           Container(
             padding: const EdgeInsets.all(8.0),

@@ -27,9 +27,16 @@ class _UsersState extends State<Users> {
 
   Future<void> _loadUsers() async {
     try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? loggedInUserEmail = prefs.getString(LocalPoint.userEmail);
       final users = await UserFetchFunction.fetchUsers();
+
+      final filteredUsers = users.where((user) {
+        return user['email'] != loggedInUserEmail;
+      }).toList();
+
       setState(() {
-        userList = users;
+        userList = filteredUsers;
         isLoading = false;
       });
     } catch (e) {
@@ -49,48 +56,39 @@ class _UsersState extends State<Users> {
         backgroundColor: Colors.white,
       ),
       body: Container(
-        color:
-            const Color.fromARGB(255, 206, 233, 255), // Light background color
+        color: const Color.fromARGB(255, 206, 233, 255),
         child: isLoading
-            ? const Center(
-                child: CircularProgressIndicator()) // Show loading indicator
-            : ListView.builder(
-                itemCount: userList.length,
-                itemBuilder: (context, index) {
-                  final user = userList[index];
-                  return Card(
-                    color: Colors.white,
-                    shape: null,
-                    margin:
-                        const EdgeInsets.symmetric(vertical: 1, horizontal: 0),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: Colors.blueAccent,
-                        child: Text(
-                          user['name'][0], // First letter of the user's name
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ),
-                      title: Text(
-                        user['name'],
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(user['email']), // Show the user's email
-                      trailing:
-                          const Icon(Icons.message, color: Colors.blueAccent),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                ChatScreen(userName: user['name']),
+            ? const Center(child: CircularProgressIndicator())
+            : userList.isEmpty
+                ? const Center(child: Text("No users found."))
+                : ListView.builder(
+                    itemCount: userList.length,
+                    itemBuilder: (context, index) {
+                      final user = userList[index];
+                      return Card(
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            child: Text(
+                              user['name'] != null && user['name'].isNotEmpty
+                                  ? user['name'][0]
+                                  : '?', // Fallback for empty name
+                            ),
                           ),
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
+                          title: Text(user['name'] ?? 'Unknown'),
+                          subtitle: Text(user['email'] ?? 'No email'),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    ChatScreen(userName: user['name'] , userId : user['id']),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
       ),
     );
   }

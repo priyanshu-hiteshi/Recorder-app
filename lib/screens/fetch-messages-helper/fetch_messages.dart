@@ -6,8 +6,10 @@ import 'package:chatapp/services/auth_service.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-class UserFetchFunction {
-  static Future<List<dynamic>> fetchUsers() async {
+class FetchMessages {
+
+
+ static Future<List<dynamic>> fetchMessage() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString(LocalPoint.authToken); // Retrieve the token
 
@@ -18,7 +20,7 @@ class UserFetchFunction {
     try {
       // Use ApiService.getRequest
       final response = await ApiService.getRequest(
-        endPoint: EndPoints.users,
+        endPoint: EndPoints.messages,
         headers: {
           'Authorization': 'Bearer $token', 
         },
@@ -31,4 +33,10 @@ class UserFetchFunction {
       throw Exception("Error during API request: $e");
     }
   }
+
+
+
+
+
+
 }

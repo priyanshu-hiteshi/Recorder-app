@@ -25,14 +25,14 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   // Text controllers for the input fields
   final TextEditingController _emailController =
-      TextEditingController(text: "testchat@yopmail.com");
+      TextEditingController(text: "ram@hiteshi.com");
   final TextEditingController _passwordController =
       TextEditingController(text: "12345678");
   // final TextEditingController _emailController = TextEditingController();
   // final TextEditingController _passwordController = TextEditingController();
 
   // Method to handle login
-
+  bool isLoading = false;
   final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
@@ -85,21 +85,43 @@ class _LoginState extends State<Login> {
                         return;
                       }
 
+                      setState(() {
+                        isLoading = true;
+                      });
+
                       await LoginApiFunction.login(
                         email: _emailController.text,
                         password: _passwordController.text,
                         context: context,
-                        onSuccess: () {
+                        onSuccess: () async {
+                          final SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
+                          prefs.setString(
+                              LocalPoint.userEmail, _emailController.text);
+
+                               setState(() {
+                            isLoading = false;
+                          });
+
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => const Users(),
                             ),
                           );
+
+                         
                         },
                       );
                     },
                   ),
+                       const SizedBox(height: 40),
+                  if (isLoading)
+                    const Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                      ),
+                    ),
 
                   const SizedBox(height: 20),
 
