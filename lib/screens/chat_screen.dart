@@ -1,8 +1,7 @@
 import 'package:chatapp/models/messages_modal.dart';
-import 'package:chatapp/screens/fetch-messages-helper/fetch_messages.dart';
+import 'package:chatapp/provider/message_provider.dart';
 import 'package:flutter/material.dart';
-import '../helper/end_points.dart';
-import '../models/messages_modal.dart'; // Import your Messages model
+import 'package:provider/provider.dart';
 
 class ChatScreen extends StatefulWidget {
   final String userName;
@@ -16,46 +15,66 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
-  List<Messages> _messages = [];
-  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchMessages();
+    context.read<MessageProvider>().fetchMessages(userId: widget.userId);
   }
 
-  Future<void> _fetchMessages() async {
-    try {
-      final response = await FetchMessages.fetchMessage();
-      setState(() {
-        _messages = response.map((e) => Messages.fromJson(e)).toList();
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      print("Error fetching messages: $e");
-    }
-  }
+  // void _sendMessage() async {
+  //   if (_messageController.text.isNotEmpty) {
+  //     try {
+  //       // Show a local message first
+  //       var senderInfo = SenderInfo(
+  //         id: 10,
+  //         name: widget.userName,
+  //         email: "", // Add email if available
+  //       );
+  //       setState(() {
+  //         _messages.add(Messages(
+  //             id: DateTime.now().millisecondsSinceEpoch, // Temporary local ID
+  //             content: _messageController.text,
+  //             senderId: 10,
+  //             recipientId:
+  //                 widget.userId, // This can be adjusted based on your logic
+  //             // roomId: null,
+  //             senderInfo: senderInfo));
+  //       });
 
-  void _sendMessage() {
-    if (_messageController.text.isNotEmpty) {
-      setState(() {
-        // Add the new message to the message list
-        _messages.add(Messages(
-          id: DateTime.now().millisecondsSinceEpoch,
-          content: _messageController.text,
-          senderId: widget.userId,
-          recipientId: null, // Update based on your logic
-          roomId: null, // Update based on your logic
-          senderInfo: SenderInfo(id: widget.userId, name: widget.userName, email: ""),
-        ));
-        _messageController.clear();
-      });
-    }
-  }
+  //       // Call the SendMessageService to send the message to the backend
+  //       final response = await SendMessagesService.sendMessage(
+  //         messageModel: MessageModel(
+  //             senderId: 10.toString(),
+  //             recipientId: widget.userId.toString(),
+  //             content: _messageController.text,
+  //             senderInfo: senderInfo),
+  //       );
+
+  //       // Add the actual response message returned from the backend
+  //       setState(() {
+  //         _messages[_messages.length - 1] = Messages(
+  //           id: response['id'], // Actual ID returned by the server
+  //           content: response['content'],
+  //           senderId: response['sender_id'],
+  //           recipientId: response['recipient_id'],
+  //           // roomId: response['room_id'],
+  //           senderInfo: SenderInfo(
+  //             id: int.parse(response['sender_info']['id']),
+  //             name: response['sender_info']['name'],
+  //             email: response['sender_info']['email'],
+  //           ),
+  //         );
+  //         _messageController.clear();
+  //       });
+  //     } catch (e) {
+  //       print("Error sending message: $e");
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text("Failed to send message")),
+  //       );
+  //     }
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -67,52 +86,57 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       body: Column(
         children: [
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16.0),
-                        topRight: Radius.circular(16.0),
+          Expanded(child: Consumer<MessageProvider>(
+            builder: (context, value, child) {
+              var _isLoading = value.isLoading;
+              var _messages = value.messages;
+              return _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(16.0),
+                          topRight: Radius.circular(16.0),
+                        ),
                       ),
-                    ),
-                    child: ListView.builder(
-                      padding: const EdgeInsets.all(8.0),
-                      itemCount: _messages.length,
-                      itemBuilder: (context, index) {
-                        Messages message = _messages[index];
-                        bool isCurrentUser = message.senderId == widget.userId;
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(8.0),
+                        itemCount: _messages.length,
+                        itemBuilder: (context, index) {
+                          Messages message = _messages[index];
+                          bool isCurrentUser =
+                              message.senderId == widget.userId;
 
-                        return Align(
-                          alignment: isCurrentUser
-                              ? Alignment.centerRight
-                              : Alignment.centerLeft,
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(vertical: 4.0),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 10.0, horizontal: 14.0),
-                            decoration: BoxDecoration(
-                              color: isCurrentUser
-                                  ? Colors.lightBlue[100]
-                                  : Colors.grey[300],
-                              borderRadius: BorderRadius.circular(12.0),
+                          return Align(
+                            alignment: isCurrentUser
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(vertical: 4.0),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 10.0, horizontal: 14.0),
+                              decoration: BoxDecoration(
+                                color: isCurrentUser
+                                    ? Colors.lightBlue[100]
+                                    : Colors.grey[300],
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              constraints: BoxConstraints(
+                                maxWidth:
+                                    MediaQuery.of(context).size.width * 0.75,
+                              ),
+                              child: Text(
+                                message.content,
+                                style: const TextStyle(color: Colors.black87),
+                              ),
                             ),
-                            constraints: BoxConstraints(
-                              maxWidth:
-                                  MediaQuery.of(context).size.width * 0.75,
-                            ),
-                            child: Text(
-                              message.content,
-                              style: const TextStyle(color: Colors.black87),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-          ),
+                          );
+                        },
+                      ),
+                    );
+            },
+          )),
           Container(
             padding: const EdgeInsets.all(8.0),
             color: Colors.white,
@@ -135,7 +159,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 CircleAvatar(
                   backgroundColor: Colors.blueAccent,
                   child: IconButton(
-                    onPressed: _sendMessage,
+                    onPressed: () {},
                     icon: const Icon(Icons.send, color: Colors.white),
                   ),
                 ),

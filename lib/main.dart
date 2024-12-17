@@ -1,10 +1,17 @@
+import 'package:chatapp/provider/message_provider.dart';
 import 'package:chatapp/screens/auth/login.dart';
 import 'package:chatapp/screens/users.dart'; // Import the Users screen
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
 
 void main() {
-  runApp(const MyApp());
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => MessageProvider()),
+    ],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {

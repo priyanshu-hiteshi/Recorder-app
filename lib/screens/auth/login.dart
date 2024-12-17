@@ -25,9 +25,9 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   // Text controllers for the input fields
   final TextEditingController _emailController =
-      TextEditingController(text: "ram@hiteshi.com");
+      TextEditingController(text: "chattest1@yopmail.com");
   final TextEditingController _passwordController =
-      TextEditingController(text: "12345678");
+      TextEditingController(text: "chattest");
   // final TextEditingController _emailController = TextEditingController();
   // final TextEditingController _passwordController = TextEditingController();
 

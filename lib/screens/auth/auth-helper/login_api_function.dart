@@ -31,10 +31,12 @@ class LoginApiFunction {
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         final token = responseData['token'];
+        final LoggedInUserId = responseData['user']['id'] ; 
 
-        if (token != null) {
+        if (token != null && LoggedInUserId != null) {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString(LocalPoint.authToken, token);
+          await prefs.setInt(LocalPoint.LoguserId , LoggedInUserId);
 
           onSuccess();
         } else {

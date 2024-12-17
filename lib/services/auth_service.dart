@@ -24,12 +24,12 @@ class ApiService {
   static Future<Response> postRequest(
       {required String endPoint,
       Map<String, String>? headers,
-      Map<String, String>? body}) async {
+      Map<String, dynamic>? body}) async {
     try {
       String url = AppConfig.baseUrl + endPoint;
       var response = await http.post(Uri.parse(url),
           headers: headers ?? {}, body: jsonEncode(body));
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return response;
       } else {
         print(response.body);

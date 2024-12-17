@@ -81,7 +81,7 @@ class _UsersState extends State<Users> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    ChatScreen(userName: user['name'] , userId : user['id']),
+                                    ChatScreen(userName: user['name'] , userId: user['id'] as int),
                               ),
                             );
                           },
