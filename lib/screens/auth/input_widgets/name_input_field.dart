@@ -9,12 +9,12 @@ class NameInputField extends StatelessWidget {
     return TextFormField(
         controller: nameController,
         keyboardType: TextInputType.name,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return "Name can't be empty";
-          }
-          return null;
-        },
+        // validator: (value) {
+        //   if (value == null || value.isEmpty) {
+        //     return "Name can't be empty";
+        //   }
+        //   return null;
+        // },
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.white,

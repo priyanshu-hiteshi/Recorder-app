@@ -10,6 +10,7 @@ import 'package:chatapp/screens/auth/input_widgets/email_input_field.dart';
 import 'package:chatapp/screens/auth/input_widgets/name_input_field.dart';
 import 'package:chatapp/screens/auth/input_widgets/password_input_field.dart';
 import 'package:chatapp/screens/auth/login.dart';
+import 'package:chatapp/screens/otp/otp.dart';
 import 'package:chatapp/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,9 +23,14 @@ class Signup extends StatefulWidget {
 }
 
 class _SignupState extends State<Signup> {
-  final _emailController = TextEditingController(text: "testchat@yopmail.com");
-  final _passwordController = TextEditingController(text: "12345678");
-  final _nameController = TextEditingController(text: "testchat");
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _nameController = TextEditingController();
+
+  //  final _emailController = TextEditingController(text: "testchat@yopmail.com");
+  // final _passwordController = TextEditingController(text: "12345678");
+  // final _nameController = TextEditingController(text: "testchat");
+
 
   final _formKey = GlobalKey<FormState>();
 
@@ -61,10 +67,17 @@ class _SignupState extends State<Signup> {
                   buttonName: 'SIGN UP',
                   onPressed: () async {
                     // context.read<AuthProvider>().login();
-                    if (_formKey.currentState == null ||
-                        !_formKey.currentState!.validate()) {
-                      return;
-                    }
+                    // if (_formKey.currentState == null ||
+                    //     !_formKey.currentState!.validate()) {
+                    //   return;
+                    // }
+
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const OtpScreen(),
+                          ),
+                        );
 
                     await SignupApiFunction.signup(
                       name: _nameController.text,
@@ -72,12 +85,7 @@ class _SignupState extends State<Signup> {
                       password: _passwordController.text,
                       context: context,
                       onSuccess: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const Login(),
-                          ),
-                        );
+                      
                       },
                     );
                   },

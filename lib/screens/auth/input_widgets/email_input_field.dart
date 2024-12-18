@@ -11,10 +11,10 @@ class EmailInputField extends StatelessWidget {
         controller: emailController,
         keyboardType: TextInputType.emailAddress,
         validator: (value) {
-          if (value == null || value.isEmpty) {
-            return "Email can't be empty";
-          }
-          return null;
+          // if (value == null || value.isEmpty) {
+          //   return "Email can't be empty";
+          // }
+          // return null;
         },
         decoration: InputDecoration(
           filled: true,

@@ -20,4 +20,10 @@ class MessageProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+
+
+// function for sending message
+
+
 }

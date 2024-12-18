@@ -22,59 +22,7 @@ class _ChatScreenState extends State<ChatScreen> {
     context.read<MessageProvider>().fetchMessages(userId: widget.userId);
   }
 
-  // void _sendMessage() async {
-  //   if (_messageController.text.isNotEmpty) {
-  //     try {
-  //       // Show a local message first
-  //       var senderInfo = SenderInfo(
-  //         id: 10,
-  //         name: widget.userName,
-  //         email: "", // Add email if available
-  //       );
-  //       setState(() {
-  //         _messages.add(Messages(
-  //             id: DateTime.now().millisecondsSinceEpoch, // Temporary local ID
-  //             content: _messageController.text,
-  //             senderId: 10,
-  //             recipientId:
-  //                 widget.userId, // This can be adjusted based on your logic
-  //             // roomId: null,
-  //             senderInfo: senderInfo));
-  //       });
-
-  //       // Call the SendMessageService to send the message to the backend
-  //       final response = await SendMessagesService.sendMessage(
-  //         messageModel: MessageModel(
-  //             senderId: 10.toString(),
-  //             recipientId: widget.userId.toString(),
-  //             content: _messageController.text,
-  //             senderInfo: senderInfo),
-  //       );
-
-  //       // Add the actual response message returned from the backend
-  //       setState(() {
-  //         _messages[_messages.length - 1] = Messages(
-  //           id: response['id'], // Actual ID returned by the server
-  //           content: response['content'],
-  //           senderId: response['sender_id'],
-  //           recipientId: response['recipient_id'],
-  //           // roomId: response['room_id'],
-  //           senderInfo: SenderInfo(
-  //             id: int.parse(response['sender_info']['id']),
-  //             name: response['sender_info']['name'],
-  //             email: response['sender_info']['email'],
-  //           ),
-  //         );
-  //         _messageController.clear();
-  //       });
-  //     } catch (e) {
-  //       print("Error sending message: $e");
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text("Failed to send message")),
-  //       );
-  //     }
-  //   }
-  // }
+ 
 
   @override
   Widget build(BuildContext context) {

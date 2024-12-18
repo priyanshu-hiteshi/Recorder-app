@@ -11,12 +11,12 @@ class PasswordInputField extends StatelessWidget {
       controller: passwordController,
       obscureText: true,
       validator: (value) {
-        if (value == null || value.isEmpty) {
-          return "Password Can't be empty";
-        } else if (value.length < 8) {
-          return "Password must be 8 char long";
-        }
-        return null;
+        // if (value == null || value.isEmpty) {
+        //   return "Password Can't be empty";
+        // } else if (value.length < 8) {
+        //   return "Password must be 8 char long";
+        // }
+        // return null;
       },
       decoration: InputDecoration(
         filled: true,

@@ -28,18 +28,19 @@ class SignupApiFunction {
           headers: {"Content-Type": "application/json"},
           body: body,
         );
+         onSuccess();
+      //   if (response.statusCode == 200) {
+      //     final responseData = json.decode(response.body);
+      //     print("Signup successful: $responseData");
 
-        if (response.statusCode == 200) {
-          final responseData = json.decode(response.body);
-          print("Signup successful: $responseData");
+      //     // Trigger the success callback
+         
+      //   } else {
+      //     showError(context, "Signup failed. Please check your credentials.");
+      //   }
+      // } else {
+      //   showError(context, "Please fill in all the fields.");
 
-          // Trigger the success callback
-          onSuccess();
-        } else {
-          showError(context, "Signup failed. Please check your credentials.");
-        }
-      } else {
-        showError(context, "Please fill in all the fields.");
       }
     }catch(e){
       print("something went wrong ${e}") ; 
