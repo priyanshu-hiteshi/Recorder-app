@@ -1,6 +1,6 @@
-import 'package:chatapp/provider/message_provider.dart';
+
 import 'package:chatapp/screens/auth/login.dart';
-import 'package:chatapp/screens/users.dart'; // Import the Users screen
+import 'package:chatapp/screens/recorder_home.dart'; // Import the Users screen
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPre
 void main() {
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (_) => MessageProvider()),
+      // ChangeNotifierProvider(create: (_) => MessageProvider()),
     ],
     child: const MyApp(),
   ));
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Chat App',
+      title: 'Recorder',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
             seedColor: const Color.fromARGB(255, 203, 235, 250)),
@@ -74,6 +74,6 @@ class _AuthCheckerState extends State<AuthChecker> {
     }
 
     // Otherwise, navigate to the appropriate screen based on auth status
-    return _isAuthenticated ? const Users() : const Login();
+    return _isAuthenticated ? const Login() : const RecorderHome();
   }
 }

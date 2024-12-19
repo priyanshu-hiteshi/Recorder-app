@@ -11,16 +11,17 @@ class EmailInputField extends StatelessWidget {
         controller: emailController,
         keyboardType: TextInputType.emailAddress,
         validator: (value) {
-          // if (value == null || value.isEmpty) {
-          //   return "Email can't be empty";
-          // }
-          // return null;
+          if (value == null || value.isEmpty) {
+            return "Email can't be empty";
+          }
+        
+          return null;
         },
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.white,
           hintText: 'Email',
-          prefixIcon: const Icon(Icons.email, color: Color(0xFF2575FC)),
+          prefixIcon: const Icon(Icons.email, color: const Color(0xFF2575FC)),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10.0),
             borderSide: BorderSide.none,

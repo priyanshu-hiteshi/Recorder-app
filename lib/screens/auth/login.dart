@@ -8,12 +8,12 @@ import 'package:chatapp/screens/auth/button_widget/elevated_button_widget.dart';
 import 'package:chatapp/screens/auth/signup.dart';
 import 'package:chatapp/screens/auth/input_widgets/email_input_field.dart';
 import 'package:chatapp/screens/auth/input_widgets/password_input_field.dart';
-import 'package:chatapp/services/auth_api.dart';
+
 import 'package:chatapp/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:chatapp/screens/users.dart'; // Replace with your actual screen
+import 'package:chatapp/screens/recorder_home.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -25,15 +25,14 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   // Text controllers for the input fields
   final TextEditingController _emailController =
-      TextEditingController(text: "chattest1@yopmail.come");
+      TextEditingController(text: "chattest1@yopmail.com");
   final TextEditingController _passwordController =
       TextEditingController(text: "chattest");
-  // final TextEditingController _emailController = TextEditingController();
-  // final TextEditingController _passwordController = TextEditingController();
 
-  // Method to handle login
+  // Loading state and form key
   bool isLoading = false;
   final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,7 +48,7 @@ class _LoginState extends State<Login> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Text(
-                    'Welcome Back!',
+                    'Welcome Back !',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 32,
@@ -59,7 +58,7 @@ class _LoginState extends State<Login> {
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    'Login to continue chatting',
+                    'Login to continue Recording',
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 16,
@@ -82,49 +81,57 @@ class _LoginState extends State<Login> {
                     onPressed: () async {
                       if (_formKey.currentState == null ||
                           !_formKey.currentState!.validate()) {
-
-                          
                         return;
                       }
 
-                      setState(() {
-                        isLoading = true;
-                      });
+                      // Set loading to true when login starts
+                    
 
-                      await LoginApiFunction.login(
-                        email: _emailController.text,
-                        password: _passwordController.text,
-                        context: context,
-                        onSuccess: () async {
-                          final SharedPreferences prefs =
-                              await SharedPreferences.getInstance();
-                          prefs.setString(
-                              LocalPoint.userEmail, _emailController.text);
+                      try {
+                        // Call login API function
+                        await LoginApiFunction.login(
+                          email: _emailController.text,
+                          password: _passwordController.text,
+                          context: context,
+                          onSuccess: () async {
+                            final SharedPreferences prefs =
+                                await SharedPreferences.getInstance();
+                            prefs.setString(
+                                LocalPoint.userEmail, _emailController.text);
 
-                               setState(() {
-                            isLoading = false;
-                          });
+                            // Stop loading
+                            setState(() {
+                              isLoading = false;
+                            });
 
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const Users(),
-                            ),
-                          );
+                            // Navigate to the Users screen
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const 
+                                RecorderHome(),
+                              ),
+                            );
+                          },
+                        );
+                      } catch (error) {
+                        // Handle any errors and stop loading
+                        setState(() {
+                          isLoading = false;
+                        });
 
-                         
-                        },
-                      );
+                        // Show error message
+                        showError(context, "Login failed. Please try again.");
+                      }
                     },
                   ),
-                       const SizedBox(height: 40),
+                  const SizedBox(height: 40),
                   if (isLoading)
                     const Center(
                       child: CircularProgressIndicator(
                         color: Colors.white,
                       ),
                     ),
-
                   const SizedBox(height: 20),
 
                   // Signup Link
@@ -135,7 +142,6 @@ class _LoginState extends State<Login> {
                           return Signup();
                         },
                       ));
-                      // Navigate to signup screen logic here
                     },
                     child: const Text(
                       "Don't have an account? Sign Up",
