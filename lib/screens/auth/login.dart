@@ -84,7 +84,7 @@ class _LoginState extends State<Login> {
                         return;
                       }
 
-                      // Set loading to true when login starts
+                     
                     
 
                       try {
@@ -100,18 +100,18 @@ class _LoginState extends State<Login> {
                                 LocalPoint.userEmail, _emailController.text);
 
                             // Stop loading
-                            setState(() {
-                              isLoading = false;
-                            });
+                            // setState(() {
+                            //   isLoading = false;
+                            // });
 
                             // Navigate to the Users screen
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const 
-                                RecorderHome(),
-                              ),
-                            );
+                            // Navigator.pushReplacement(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) => const 
+                            //     RecorderHome(),
+                            //   ),
+                            // );
                           },
                         );
                       } catch (error) {
