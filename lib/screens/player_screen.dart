@@ -15,97 +15,163 @@ class PlayerScreen extends StatelessWidget {
       create: (_) => PlayerProvider(),
       child: Scaffold(
         appBar: AppBar(
-          title: Text(fileName),
-          backgroundColor: const Color(0xFF2575FC),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Consumer<PlayerProvider>(
-            builder: (context, provider, child) {
-              return Column(
-                children: [
-                  Slider(
-                    value: provider.progress,
-                    onChanged: (value) => provider.seekTo(value),
-                    min: 0.0,
-                    max: 1.0,
-                    activeColor: const Color(0xFF2575FC),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        provider.currentPosition != null
-                            ? _formatDuration(provider.currentPosition!)
-                            : "00:00",
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      Text(
-                        provider.totalDuration != null
-                            ? _formatDuration(provider.totalDuration!)
-                            : "00:00",
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          provider.isPlaying
-                              ? Icons.pause
-                              : Icons.play_arrow,
-                          size: 48,
-                          color: const Color(0xFF2575FC),
-                        ),
-                        onPressed: () => provider.playPause(filePath),
-                      ),
-                      const SizedBox(width: 20),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.stop,
-                          size: 48,
-                          color: Colors.red,
-                        ),
-                        onPressed: provider.stopPlayback,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    "Playback Speed",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () => provider.setPlaybackSpeed(0.5),
-                        child: const Text("0.5x"),
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        onPressed: () => provider.setPlaybackSpeed(1.0),
-                        child: const Text("1.0x"),
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        onPressed: () => provider.setPlaybackSpeed(1.5),
-                        child: const Text("1.5x"),
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        onPressed: () => provider?.setPlaybackSpeed(2.0),
-                        child: const Text("2.0x"),
-                      ),
-                    ],
-                  ),
-                ],
-              );
-            },
+          title: Text(
+            fileName,
+            style: const TextStyle(color: Colors.black),
           ),
+          backgroundColor: Colors.white,
+          elevation: 1,
+          iconTheme: const IconThemeData(color: Colors.black),
+        ),
+        body: Consumer<PlayerProvider>(
+          builder: (context, provider, child) {
+            return Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Playback Controls
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // const SizedBox(width: 20),
+                          // IconButton(
+                          //   icon: const Icon(
+                          //     Icons.stop,
+                          //     size: 64,
+                          //     color: Colors.red,
+                          //   ),
+                          //   onPressed: provider.stopPlayback,
+                          // ),
+                        ],
+                      ),
+
+                      // Playback Speed Popup
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+
+                // Progress Bar at the Bottom
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Slider(
+                        value: provider.progress,
+                        onChanged: (value) => provider.seekTo(value),
+                        min: 0.0,
+                        max: 1.0,
+                        activeColor: const Color(0xFF2575FC),
+                        inactiveColor: Colors.grey.shade300,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              provider.currentPosition != null
+                                  ? _formatDuration(provider.currentPosition!)
+                                  : "00:00",
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            Text(
+                              provider.totalDuration != null
+                                  ? _formatDuration(provider.totalDuration!)
+                                  : "00:00",
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      GestureDetector(
+                        onTap: () => provider.playPause(filePath),
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 40),
+
+                          width: 60, // Adjust size for the circular button
+                          height: 60,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: provider.isPlaying
+                                ? const Color(0xFF2575FC)
+                                : const Color(0xFF2575FC),
+                            // Background color
+                          ),
+                          child: Center(
+                            child: Icon(
+                              provider.isPlaying
+                                  ? Icons.pause
+                                  : Icons.play_arrow,
+                              size: 40, // Icon size
+                              color: Colors.white, // Icon color
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                Align(
+                  alignment: Alignment
+                      .bottomCenter, // Align to the bottom-center of the screen
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        bottom: 40), // Margin from the bottom
+                    child: Stack(
+                      children: [
+                     
+                        Positioned(
+                          right: 16,
+                          bottom: 16,
+                          child: PopupMenuButton<double>(
+                            onSelected: (speed) =>
+                                provider.setPlaybackSpeed(speed),
+                            itemBuilder: (context) => [
+                              const PopupMenuItem(
+                                value: 0.5,
+                                child: Text("0.5x"),
+                              ),
+                              const PopupMenuItem(
+                                value: 1.0,
+                                child: Text("1.0x"),
+                              ),
+                              const PopupMenuItem(
+                                value: 1.5,
+                                child: Text("1.5x"),
+                              ),
+                              const PopupMenuItem(
+                                value: 2.0,
+                                child: Text("2.0x"),
+                              ),
+                            ],
+                            child: Row(
+                              children: [
+                                Text(
+                                  "${provider.speed}x",
+                                  style: const TextStyle(
+                                      fontSize: 16, color: Color(0xFF2575FC)),
+                                ),
+                                const Icon(Icons.arrow_drop_down,
+                                    color: Color(0xFF2575FC)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            );
+          },
         ),
       ),
     );

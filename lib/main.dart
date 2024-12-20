@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
       darkTheme: ThemeData.dark(),
       theme: ThemeData(
      
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFCBEBFA)),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
         useMaterial3: true,
       ),
       home: Consumer<AuthProvider>(
@@ -39,7 +39,8 @@ class MyApp extends StatelessWidget {
           if (authProvider.isAuthenticated == null) {
             return const Center(child: CircularProgressIndicator());
           }
-          return authProvider.isAuthenticated ? const RecorderHome() : const Login();
+          // return authProvider.isAuthenticated ? const RecorderHome() : const Login();
+            return const RecorderHome(); 
         },
       ),
     );

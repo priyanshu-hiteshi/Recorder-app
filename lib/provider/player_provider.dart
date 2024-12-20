@@ -26,23 +26,26 @@ class PlayerProvider extends ChangeNotifier {
   }
 
   Future<void> playPause(String filePath) async {
-    if (isPlaying) {
-      await _player.stopPlayer();
-    } else {
-      await _player.startPlayer(
-        fromURI: filePath,
-        codec: Codec.defaultCodec,
-        whenFinished: () {
-          isPlaying = false;
-          progress = 0.0;
-          notifyListeners();
-        },
-      );
-      _player.setSpeed(speed);
-    }
-    isPlaying = !isPlaying;
-    notifyListeners();
+  if (isPlaying) {
+    // Pause the playback instead of stopping
+    await _player.pausePlayer();
+  } else {
+    // Start or resume playback
+    await _player.startPlayer(
+      fromURI: filePath,
+      codec: Codec.defaultCodec,
+      whenFinished: () {
+        isPlaying = false;
+        progress = 0.0;
+        notifyListeners();
+      },
+    );
+    _player.setSpeed(speed);
   }
+  isPlaying = !isPlaying;
+  notifyListeners();
+}
+
 
   Future<void> stopPlayback() async {
     await _player.stopPlayer();
