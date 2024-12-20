@@ -157,7 +157,7 @@ class PlayerScreen extends StatelessWidget {
                                 Text(
                                   "${provider.speed}x",
                                   style: const TextStyle(
-                                      fontSize: 16, color: Color(0xFF2575FC)),
+                                      fontSize: 16, color: Color(0xFF2575FC) , fontWeight : FontWeight.bold), 
                                 ),
                                 const Icon(Icons.arrow_drop_down,
                                     color: Color(0xFF2575FC)),
