@@ -46,7 +46,7 @@ class SaveRecordingModal extends StatelessWidget {
             TextButton(
               onPressed: onCancel,
               style: TextButton.styleFrom(
-                backgroundColor: Colors.white, // Red background color
+                backgroundColor: Colors.grey[900], // Red background color
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -54,7 +54,7 @@ class SaveRecordingModal extends StatelessWidget {
               ),
               child: const Text(
                 "Cancel",
-                style: TextStyle(color: Colors.red ,fontWeight: FontWeight.bold ), // White text on red background
+                style: TextStyle(color: Colors.white ,fontWeight: FontWeight.bold ), // White text on red background
               ),
             ),
             
@@ -62,11 +62,13 @@ class SaveRecordingModal extends StatelessWidget {
             TextButton(
               onPressed: onSave,
               child: const Icon(
-                Icons.save,
+                Icons.bookmark_outline,
                 color: Colors.white, // White icon to match dark background
               ),
-              
+               
             ),
+
+            
           ],
         ),
       ],

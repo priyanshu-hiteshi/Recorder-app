@@ -74,7 +74,7 @@ class RecorderHome extends StatelessWidget {
                     // Lottie animation
                     Consumer<RecorderProvider>(
                       builder: (context, provider, child) {
-                        return provider.isRecording
+                        return provider.isRecording || provider.isPaused
                             ? Lottie.asset(
                                 'assets/animations/recording.json',
                                 width: 250,

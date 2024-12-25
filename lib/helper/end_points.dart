@@ -4,6 +4,7 @@ class EndPoints {
   static const String fetchfiles = "/api/file/getAllAudio" ; 
   static const String generateSummary = "/api/file/summarizeOnClick/" ; 
   static const String deleteFile = "/api/file/deleteFileById/" ; 
+  static const String renameFile = "/api/file/renameFileById/" ;  
 
 
 

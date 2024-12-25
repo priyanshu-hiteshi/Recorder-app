@@ -25,6 +25,7 @@ class _RecorderListScreenState extends State<RecorderListScreen> {
   @override
   Widget build(BuildContext context) {
     final dialogProvider = Provider.of<DialogProvider>(context, listen: false);
+    final recorderProvider = Provider.of<RecorderProvider>(context ) ; 
 
     return Scaffold(
       appBar: AppBar(

@@ -1,3 +1,4 @@
+import 'package:chatapp/app_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 
@@ -26,26 +27,26 @@ class PlayerProvider extends ChangeNotifier {
   }
 
   Future<void> playPause(String filePath) async {
-  if (isPlaying) {
-    // Pause the playback instead of stopping
-    await _player.pausePlayer();
-  } else {
-    // Start or resume playback
-    await _player.startPlayer(
-      fromURI: filePath,
-      codec: Codec.defaultCodec,
-      whenFinished: () {
-        isPlaying = false;
-        progress = 0.0;
-        notifyListeners();
-      },
-    );
-    _player.setSpeed(speed);
+    if (isPlaying) {
+      // Pause the playback instead of stopping
+      await _player.pausePlayer();
+    } else {
+      // Start or resume playback
+      print("${AppConfig.baseUrl}" + filePath);
+      await _player.startPlayer(
+        fromURI: "${AppConfig.baseUrl}" + filePath,
+        codec: Codec.defaultCodec,
+        whenFinished: () {
+          isPlaying = false;
+          progress = 0.0;
+          notifyListeners();
+        },
+      );
+      _player.setSpeed(speed);
+    }
+    isPlaying = !isPlaying;
+    notifyListeners();
   }
-  isPlaying = !isPlaying;
-  notifyListeners();
-}
-
 
   Future<void> stopPlayback() async {
     await _player.stopPlayer();
@@ -63,8 +64,7 @@ class PlayerProvider extends ChangeNotifier {
   Future<void> seekTo(double value) async {
     if (totalDuration != null) {
       final newPosition = Duration(
-          milliseconds:
-              (value * (totalDuration!.inMilliseconds)).toInt());
+          milliseconds: (value * (totalDuration!.inMilliseconds)).toInt());
       await _player.seekToPlayer(newPosition);
     }
   }
