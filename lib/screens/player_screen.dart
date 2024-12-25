@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:lottie/lottie.dart'; // Import Lottie package
 import '../provider/player_provider.dart';
 
 class PlayerScreen extends StatelessWidget {
@@ -14,14 +15,15 @@ class PlayerScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => PlayerProvider(),
       child: Scaffold(
+        backgroundColor: Colors.black,
         appBar: AppBar(
           title: Text(
             fileName,
-            style: const TextStyle(color: Colors.black),
+            style: const TextStyle(color: Colors.grey),
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.black,
           elevation: 1,
-          iconTheme: const IconThemeData(color: Colors.black),
+          iconTheme: const IconThemeData(color: Colors.grey),
         ),
         body: Consumer<PlayerProvider>(
           builder: (context, provider, child) {
@@ -33,29 +35,28 @@ class PlayerScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      // Lottie Animation at the center (only visible when playing)
+                      provider.isPlaying
+                          ? Lottie.asset(
+                              'assets/animations/player.json', 
+                              width: 150,
+                              height: 150,
+                              fit: BoxFit.contain,
+                            )
+                          : const SizedBox(), // Empty when not playing
+
                       // Playback Controls
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // const SizedBox(width: 20),
-                          // IconButton(
-                          //   icon: const Icon(
-                          //     Icons.stop,
-                          //     size: 64,
-                          //     color: Colors.red,
-                          //   ),
-                          //   onPressed: provider.stopPlayback,
-                          // ),
-                        ],
+                        children: [],
                       ),
 
-                      // Playback Speed Popup
                       const SizedBox(height: 20),
                     ],
                   ),
                 ),
 
-                // Progress Bar at the Bottom
+              
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Column(
@@ -66,7 +67,7 @@ class PlayerScreen extends StatelessWidget {
                         onChanged: (value) => provider.seekTo(value),
                         min: 0.0,
                         max: 1.0,
-                        activeColor: const Color(0xFF2575FC),
+                        activeColor: const Color.fromARGB(255, 249, 22, 14),
                         inactiveColor: Colors.grey.shade300,
                       ),
                       Padding(
@@ -78,13 +79,15 @@ class PlayerScreen extends StatelessWidget {
                               provider.currentPosition != null
                                   ? _formatDuration(provider.currentPosition!)
                                   : "00:00",
-                              style: const TextStyle(fontSize: 14),
+                              style: const TextStyle(
+                                  fontSize: 14, color: Colors.grey),
                             ),
                             Text(
                               provider.totalDuration != null
                                   ? _formatDuration(provider.totalDuration!)
                                   : "00:00",
-                              style: const TextStyle(fontSize: 14),
+                              style: const TextStyle(
+                                  fontSize: 14, color: Colors.grey),
                             ),
                           ],
                         ),
@@ -94,15 +97,13 @@ class PlayerScreen extends StatelessWidget {
                         onTap: () => provider.playPause(filePath),
                         child: Container(
                           margin: const EdgeInsets.only(bottom: 40),
-
                           width: 60, // Adjust size for the circular button
                           height: 60,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: provider.isPlaying
-                                ? const Color(0xFF2575FC)
-                                : const Color(0xFF2575FC),
-                            // Background color
+                                ? const Color.fromARGB(255, 249, 22, 14)
+                                : const Color.fromARGB(255, 249, 22, 14),
                           ),
                           child: Center(
                             child: Icon(
@@ -127,7 +128,6 @@ class PlayerScreen extends StatelessWidget {
                         bottom: 40), // Margin from the bottom
                     child: Stack(
                       children: [
-                     
                         Positioned(
                           right: 16,
                           bottom: 16,
@@ -157,10 +157,12 @@ class PlayerScreen extends StatelessWidget {
                                 Text(
                                   "${provider.speed}x",
                                   style: const TextStyle(
-                                      fontSize: 16, color: Color(0xFF2575FC) , fontWeight : FontWeight.bold), 
+                                      fontSize: 16,
+                                      color: Color.fromARGB(255, 249, 22, 14),
+                                      fontWeight: FontWeight.bold),
                                 ),
                                 const Icon(Icons.arrow_drop_down,
-                                    color: Color(0xFF2575FC)),
+                                    color: Color.fromARGB(255, 249, 22, 14)),
                               ],
                             ),
                           ),

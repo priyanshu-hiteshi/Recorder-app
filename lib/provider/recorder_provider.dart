@@ -1,11 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+import 'package:chatapp/app_config.dart';
+import 'package:chatapp/helper/end_points.dart';
 import 'package:chatapp/helper/local_point.dart';
+import 'package:chatapp/models/all_audios_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:http/http.dart' as http;
 
 class RecorderProvider with ChangeNotifier {
   FlutterSoundRecorder? _recorder;
@@ -18,8 +23,9 @@ class RecorderProvider with ChangeNotifier {
   String timerText = "00:00";
   Timer? _timer;
   int pausedAt = 0;
+  List<AllAudio> _recordings = [];
 
-
+  List<AllAudio> get recordings => _recordings;
 
   RecorderProvider() {
     _recorder = FlutterSoundRecorder();
@@ -101,19 +107,75 @@ class RecorderProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> saveRecordingWithTitle(String title) async {
-    if (recordingFilePath != null) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      List<String> recordings = prefs.getStringList(LocalPoint.recordings) ?? [];
-      recordings.add('$title|$recordingFilePath');
-      await prefs.setStringList(LocalPoint.recordings, recordings);
-      resetRecorderState();
+
+Future<void> fetchRecordings() async {
+  try {
+    final response = await http.get(
+      Uri.parse('${AppConfig.baseUrl}${EndPoints.fetchfiles}'),
+    );
+
+    if (response.statusCode == 200) {
+      final messageModel = MessageModel.fromJson(json.decode(response.body));
+      if (messageModel.success) {
+        _recordings = messageModel.allAudios;
+        print(messageModel.allAudios) ; 
+        notifyListeners();
+      } else {
+        throw Exception("Failed to fetch recordings: ${messageModel.message}");
+      }
+    } else {
+      throw Exception("Failed to load recordings. Status: ${response.statusCode}");
+    }
+  } catch (e) {
+    print("Error fetching recordings: $e");
+    throw Exception("Error fetching recordings");
+  }
+}
+
+
+
+  
+
+  Future<void> uploadRecordingToServer(String filePath, String title) async {
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('${AppConfig.baseUrl}${EndPoints.fileUpload}'),
+      );
+
+      var file = await http.MultipartFile.fromPath("audioFile", filePath);
+      request.files.add(file);
+
+      request.fields['title'] = title;
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        print("File uploaded successfully!");
+      } else {
+        print("File upload failed with status: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error uploading file: $e");
+      throw Exception("Failed to upload recording");
     }
   }
 
-  Future<List<String>> getRecordings() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getStringList(LocalPoint.recordings) ?? [];
+  Future<void> saveRecordingWithTitleAndUpload(String title) async {
+    if (recordingFilePath != null) {
+      // Save locally
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      List<String> recordings =
+          prefs.getStringList(LocalPoint.recordings) ?? [];
+      recordings.add('$title|$recordingFilePath');
+      await prefs.setStringList(LocalPoint.recordings, recordings);
+
+      // Upload to server
+      await uploadRecordingToServer(recordingFilePath!, title);
+
+      // Reset recorder state
+      resetRecorderState();
+    }
   }
 
   Future<void> playRecording(String filePath) async {

@@ -1,9 +1,13 @@
+import 'package:chatapp/screens/auth/login.dart';
 import 'package:chatapp/screens/recorder_list.dart';
 import 'package:chatapp/widgets/custom_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../provider/recorder_provider.dart';
 import '../widgets/custom_modal.dart';
+import 'package:audio_waveforms/audio_waveforms.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 
 class RecorderHome extends StatelessWidget {
   const RecorderHome({super.key});
@@ -14,13 +18,15 @@ class RecorderHome extends StatelessWidget {
         Provider.of<RecorderProvider>(context, listen: false);
 
     return FutureBuilder(
-      
       future: recorderProvider.initRecorder(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
+            backgroundColor: Colors.black,
             body: Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                color: Colors.red,
+              ),
             ),
           );
         }
@@ -37,28 +43,56 @@ class RecorderHome extends StatelessWidget {
         }
 
         return Scaffold(
+          backgroundColor: Colors.black,
           body: Column(
-            
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Timer display
               Center(
-                child: Consumer<RecorderProvider>(
-                  builder: (context, provider, child) => Text(
-                    provider.timerText,
-                    style: const TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                child: Column(
+                  mainAxisAlignment:
+                      MainAxisAlignment.center, // Center vertically
+                  crossAxisAlignment:
+                      CrossAxisAlignment.center, // Center horizontally
+                  children: [
+                    // Timer text
+                    Consumer<RecorderProvider>(
+                      builder: (context, provider, child) => Text(
+                        provider.timerText,
+                        style: const TextStyle(
+                          fontSize: 48,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                  ),
+
+                    const SizedBox(
+                        height: 20), // Add spacing between text and animation
+
+                    // Lottie animation
+                    Consumer<RecorderProvider>(
+                      builder: (context, provider, child) {
+                        return provider.isRecording
+                            ? Lottie.asset(
+                                'assets/animations/recording.json',
+                                width: 250,
+                                height: 150,
+                                fit: BoxFit
+                                    .contain, // Use BoxFit.contain for proper scaling
+                              )
+                            : const SizedBox(); // Empty widget if not recording
+                      },
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
           bottomNavigationBar: Container(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            color: Colors.white,
+            color: Colors.black,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -74,15 +108,21 @@ class RecorderHome extends StatelessWidget {
                         }
                       },
                       child: CircleAvatar(
-                        backgroundColor: provider.isRecording
-                            ? Colors.red // For recording state
-                            : const Color(0xFF2575FC), // For stopped state
+                        backgroundColor:
+                            provider.isRecording ? Colors.white : Colors.red,
                         radius: 30,
-                        child: Icon(
-                          provider.isRecording ? Icons.stop : Icons.mic,
-                          size: 32,
-                          color: Colors.white,
-                        ),
+                        child: provider.isRecording
+                            ? Lottie.asset(
+                                'assets/animations/micAnimation.json',
+                                width: 82,
+                                height: 82,
+                                fit: BoxFit.cover,
+                              )
+                            : Icon(
+                                Icons.mic,
+                                size: 32,
+                                color: Colors.white,
+                              ),
                       ),
                     );
                   },
@@ -117,7 +157,7 @@ class RecorderHome extends StatelessWidget {
                                 color: Colors.black,
                               ),
                             )
-                          : Text(""),
+                          : const SizedBox(),
                     );
                   },
                 ),
@@ -146,6 +186,7 @@ class RecorderHome extends StatelessWidget {
                     } else {
                       return ElevatedButton(
                         onPressed: () {
+                          // recorderProvider.fetchRecordings();
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -192,16 +233,26 @@ class RecorderHome extends StatelessWidget {
             provider.resetRecorderState();
           },
           onSave: () async {
-            await provider.saveRecordingWithTitle(titleController.text);
-            // Show success message
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Recording saved successfully!'),
-                duration: Duration(seconds: 2),
-              ),
-            );
-            provider.resetRecorderState();
-            Navigator.pop(context);
+            try {
+              await provider
+                  .saveRecordingWithTitleAndUpload(titleController.text);
+              // Show success message
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Recording saved and uploaded successfully!'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+              Navigator.pop(context);
+            } catch (e) {
+              // Show error message
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Failed to upload recording.'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            }
           },
         );
       },
