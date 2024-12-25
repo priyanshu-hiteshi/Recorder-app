@@ -107,34 +107,31 @@ class RecorderProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> fetchRecordings() async {
+    try {
+      final response = await http.get(
+        Uri.parse('${AppConfig.baseUrl}${EndPoints.fetchfiles}'),
+      );
 
-Future<void> fetchRecordings() async {
-  try {
-    final response = await http.get(
-      Uri.parse('${AppConfig.baseUrl}${EndPoints.fetchfiles}'),
-    );
-
-    if (response.statusCode == 200) {
-      final messageModel = MessageModel.fromJson(json.decode(response.body));
-      if (messageModel.success) {
-        _recordings = messageModel.allAudios;
-        print(messageModel.allAudios) ; 
-        notifyListeners();
+      if (response.statusCode == 200) {
+        final messageModel = MessageModel.fromJson(json.decode(response.body));
+        if (messageModel.success) {
+          _recordings = messageModel.allAudios;
+          print(messageModel.allAudios);
+          notifyListeners();
+        } else {
+          throw Exception(
+              "Failed to fetch recordings: ${messageModel.message}");
+        }
       } else {
-        throw Exception("Failed to fetch recordings: ${messageModel.message}");
+        throw Exception(
+            "Failed to load recordings. Status: ${response.statusCode}");
       }
-    } else {
-      throw Exception("Failed to load recordings. Status: ${response.statusCode}");
+    } catch (e) {
+      print("Error fetching recordings: $e");
+      throw Exception("Error fetching recordings");
     }
-  } catch (e) {
-    print("Error fetching recordings: $e");
-    throw Exception("Error fetching recordings");
   }
-}
-
-
-
-  
 
   Future<void> uploadRecordingToServer(String filePath, String title) async {
     try {

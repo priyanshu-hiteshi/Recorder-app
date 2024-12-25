@@ -1,5 +1,7 @@
 import 'package:chatapp/models/all_audios_model.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import '../provider/recorder_provider.dart';
 import '../provider/dialog_provider.dart';
@@ -25,16 +27,17 @@ class _RecorderListScreenState extends State<RecorderListScreen> {
   @override
   Widget build(BuildContext context) {
     final dialogProvider = Provider.of<DialogProvider>(context, listen: false);
-    final recorderProvider = Provider.of<RecorderProvider>(context ) ; 
+    final recorderProvider = Provider.of<RecorderProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 1,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
+        title: Text(
           'Recordings',
-          style: TextStyle(color: Colors.white),
+          style: GoogleFonts.poppins(
+              color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
       backgroundColor: Colors.black,
@@ -70,11 +73,11 @@ class _RecorderListScreenState extends State<RecorderListScreen> {
                     ),
                     title: Text(
                       recording.filename,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                        color: Color.fromARGB(255, 183, 182, 182),
-                      ),
+                    
+
+                       style: GoogleFonts.poppins(
+                      color: Color.fromARGB(255, 183, 182, 182), fontWeight: FontWeight.w600, fontSize: 14,),
+
                     ),
                     trailing: PopupMenuButton<String>(
                       icon: const Icon(Icons.more_vert, color: Colors.white),
@@ -84,7 +87,8 @@ class _RecorderListScreenState extends State<RecorderListScreen> {
                         } else if (value == 'Delete') {
                           dialogProvider.deleteRecording(context, recording);
                         } else if (value == 'Generate') {
-                          dialogProvider.generateRecordingData(context, recording);
+                          dialogProvider.generateRecordingData(
+                              context, recording);
                         } else if (value == 'Show') {
                           dialogProvider.showSummary(context, recording);
                         }

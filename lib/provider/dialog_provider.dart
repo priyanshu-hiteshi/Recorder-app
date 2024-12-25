@@ -10,6 +10,8 @@ import 'package:http/http.dart' as http;
 import 'package:chatapp/models/all_audios_model.dart' as allAudios;
 import 'package:chatapp/models/generate_text_model.dart' as generateText;
 
+import 'package:lottie/lottie.dart';
+
 class DialogProvider extends ChangeNotifier {
   List<allAudios.AllAudio> recordings = [];
   bool isLoading = false;
@@ -118,6 +120,7 @@ class DialogProvider extends ChangeNotifier {
   Future<void> deleteRecording(
       BuildContext context, allAudios.AllAudio recording) async {
     // Show confirmation dialog
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -191,12 +194,27 @@ class DialogProvider extends ChangeNotifier {
     BuildContext context,
     allAudios.AllAudio recording,
   ) async {
+    // Show loading dialog with Lottie animation
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => Center(
+        child: Lottie.asset(
+          'assets/animations/r.json',
+          width: 250,
+          height: 250,
+        ),
+      ),
+    );
+
     try {
       final response = await http.get(
         Uri.parse(
           '${AppConfig.baseUrl}${EndPoints.generateSummary}${recording.id}',
         ),
       );
+
+      Navigator.pop(context); // Close the loading dialog
 
       if (response.statusCode == 200) {
         if (response.body.isNotEmpty) {
@@ -206,7 +224,6 @@ class DialogProvider extends ChangeNotifier {
             final messageModel = GenerateTextMessage.fromJson(decodedJson);
 
             // Show modal dialog with the generated text
-
             showDialog(
               context: context,
               builder: (context) => AlertDialog(

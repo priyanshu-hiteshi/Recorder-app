@@ -1,3 +1,4 @@
+import 'package:chatapp/provider/dialog_provider.dart';
 import 'package:chatapp/screens/auth/login.dart';
 import 'package:chatapp/screens/recorder_list.dart';
 import 'package:chatapp/widgets/custom_modal.dart';
@@ -74,7 +75,7 @@ class RecorderHome extends StatelessWidget {
                     // Lottie animation
                     Consumer<RecorderProvider>(
                       builder: (context, provider, child) {
-                        return provider.isRecording || provider.isPaused
+                        return provider.isRecording && !provider.isPaused
                             ? Lottie.asset(
                                 'assets/animations/recording.json',
                                 width: 250,
@@ -82,7 +83,9 @@ class RecorderHome extends StatelessWidget {
                                 fit: BoxFit
                                     .contain, // Use BoxFit.contain for proper scaling
                               )
-                            : const SizedBox(); // Empty widget if not recording
+                            : const SizedBox(
+                                height: 150,
+                              ); // Empty widget if not recording
                       },
                     ),
                   ],
@@ -236,6 +239,8 @@ class RecorderHome extends StatelessWidget {
             try {
               await provider
                   .saveRecordingWithTitleAndUpload(titleController.text);
+                     
+   
               // Show success message
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(

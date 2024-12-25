@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart'; // Import Lottie package
 import '../provider/player_provider.dart';
@@ -19,11 +20,12 @@ class PlayerScreen extends StatelessWidget {
         appBar: AppBar(
           title: Text(
             fileName,
-            style: const TextStyle(color: Colors.grey),
+             style: GoogleFonts.poppins(
+              color: Colors.white, fontWeight: FontWeight.bold),
           ),
           backgroundColor: Colors.black,
           elevation: 1,
-          iconTheme: const IconThemeData(color: Colors.grey),
+          iconTheme: const IconThemeData(color: Colors.white),
         ),
         body: Consumer<PlayerProvider>(
           builder: (context, provider, child) {
