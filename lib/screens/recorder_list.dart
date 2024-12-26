@@ -26,7 +26,7 @@ class _RecorderListScreenState extends State<RecorderListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final dialogProvider = Provider.of<DialogProvider>(context, listen: false);
+    // final dialogProvider = Provider.of<DialogProvider>(context, listen: false);
     final recorderProvider = Provider.of<RecorderProvider>(context);
 
     return Scaffold(
@@ -83,14 +83,14 @@ class _RecorderListScreenState extends State<RecorderListScreen> {
                       icon: const Icon(Icons.more_vert, color: Colors.white),
                       onSelected: (value) {
                         if (value == 'Rename') {
-                          dialogProvider.renameRecording(context, recording);
+                          recorderProvider.renameRecording(context, recording);
                         } else if (value == 'Delete') {
-                          dialogProvider.deleteRecording(context, recording);
+                          recorderProvider.deleteRecording(context, recording);
                         } else if (value == 'Generate') {
-                          dialogProvider.generateRecordingData(
+                          recorderProvider.generateRecordingData(
                               context, recording);
                         } else if (value == 'Show') {
-                          dialogProvider.showSummary(context, recording);
+                        recorderProvider.showSummary(context, recording);
                         }
                       },
                       itemBuilder: (context) => [

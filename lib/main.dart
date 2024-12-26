@@ -13,7 +13,7 @@ void main() {
   runApp(MultiProvider(
     providers: [
       // ChangeNotifierProvider(create: (_) => MessageProvider()),
-      ChangeNotifierProvider(create: (_) => DialogProvider()),
+      // ChangeNotifierProvider(create: (_) => DialogProvider()),
       ChangeNotifierProvider(create: (_) => RecorderProvider()),
       ChangeNotifierProvider(create: (_) => AuthProvider()) , 
       ChangeNotifierProvider(create: (_) => PlayerProvider()) , 

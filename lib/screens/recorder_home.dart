@@ -60,11 +60,10 @@ class RecorderHome extends StatelessWidget {
                     Consumer<RecorderProvider>(
                       builder: (context, provider, child) => Text(
                         provider.timerText,
-                        style: const TextStyle(
-                          fontSize: 48,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.bold,
+                        style: GoogleFonts.poppins(
                           color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 48,
                         ),
                       ),
                     ),
@@ -239,8 +238,7 @@ class RecorderHome extends StatelessWidget {
             try {
               await provider
                   .saveRecordingWithTitleAndUpload(titleController.text);
-                     
-   
+
               // Show success message
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(

@@ -9,6 +9,8 @@ class ApiService {
       {required String endPoint, Map<String, String>? headers}) async {
     try {
       String url = AppConfig.baseUrl + endPoint;
+      // String token = shareh.get("token");
+      // headers?.putIfAbsent("token", () => token);
       var response = await http.get(Uri.parse(url), headers: headers ?? {});
       if (response.statusCode == 200 || response.statusCode == 201) {
         return response;
