@@ -1,4 +1,3 @@
-import 'package:chatapp/provider/dialog_provider.dart';
 import 'package:chatapp/screens/auth/login.dart';
 import 'package:chatapp/screens/recorder_list.dart';
 import 'package:chatapp/widgets/custom_modal.dart';

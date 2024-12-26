@@ -141,32 +141,42 @@ class RecorderProvider with ChangeNotifier {
   }
 
   Future<void> uploadRecordingToServer(String filePath, String title) async {
-    try {
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('${AppConfig.baseUrl}${EndPoints.fileUpload}'),
-      );
+  try {
+    // Create a multipart request
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse('${AppConfig.baseUrl}${EndPoints.fileUpload}'),
+    );
 
-      var file = await http.MultipartFile.fromPath("audioFile", filePath);
-      request.files.add(file);
+    // Add the file to the request
+    var file = await http.MultipartFile.fromPath(
+      'audioFile', // Key for the file in the request
+      filePath,
+    );
+    request.files.add(file);
 
-      request.fields['title'] = title;
+    // Add additional fields to the request
+    request.fields['fileName'] = title;
 
-      var response = await request.send();
+    // Send the request
+    var response = await request.send();
 
-      if (response.statusCode == 200) {
-        print("File uploaded successfully!");
-      } else {
-        print("File upload failed with status: ${response.statusCode}");
-      }
-    } catch (e) {
-      print("Error uploading file: $e");
-      throw Exception("Failed to upload recording");
+    // Handle the response
+    if (response.statusCode == 200) {
+      print("File uploaded successfully!");
+    } else {
+      print("File upload failed with status: ${response.statusCode}");
     }
+  } catch (e) {
+    print("Error uploading file: $e");
+    throw Exception("Failed to upload recording");
   }
+}
 
-  Future<void> saveRecordingWithTitleAndUpload(String title) async {
-    if (recordingFilePath != null) {
+
+ Future<void> saveRecordingWithTitleAndUpload(String title) async {
+  if (recordingFilePath != null) {
+    try {
       // Save locally
       SharedPreferences prefs = await SharedPreferences.getInstance();
       List<String> recordings =
@@ -174,13 +184,27 @@ class RecorderProvider with ChangeNotifier {
       recordings.add('$title|$recordingFilePath');
       await prefs.setStringList(LocalPoint.recordings, recordings);
 
+      print("Recordings saved locally: $recordings");
+
       // Upload to server
+      print("Uploading recording to server...");
       await uploadRecordingToServer(recordingFilePath!, title);
+      print("Recording uploaded successfully!");
 
       // Reset recorder state
       resetRecorderState();
+      print("Recorder state reset.");
+    } catch (e) {
+      // Handle errors gracefully
+      print("Error in saving or uploading recording: $e");
+      throw Exception("Failed to save or upload recording.");
     }
+  } else {
+    print("No recording file path available to save or upload.");
+    throw Exception("Recording file path is null.");
   }
+}
+
 
   Future<void> playRecording(String filePath) async {
     if (isPlaying) {
@@ -213,138 +237,138 @@ class RecorderProvider with ChangeNotifier {
     notifyListeners();
   }
 
-// Future<bool> renameAudioFile(String recordingId, String newName) async {
-//   try {
-//     // API endpoint
-//     final String url =
-//         '${AppConfig.baseUrl}${EndPoints.renameFile}$recordingId';
+Future<bool> renameAudioFile(int recordingId, String newName) async {
+  try {
+    // API endpoint
+    final String url =
+        '${AppConfig.baseUrl}${EndPoints.renameFile}$recordingId';
 
-//     // Request payload
-//     final Map<String, String> body = {
-//       "newName": newName,
-//     };
+    // Request payload
+    final Map<String, String> body = {
+      "newName": newName,
+    };
 
-//     // API call
-//     final response = await http.put(
-//       Uri.parse(url),
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: jsonEncode(body),
-//     );
-
-//     if (response.statusCode == 200) {
-//       return true; // Success
-//     } else {
-//       throw Exception(
-//           'Failed to rename the recording. Status code: ${response.statusCode}');
-//     }
-//   } catch (e) {
-//     throw Exception('An error occurred: ${e.toString()}');
-//   }
-// }
-
-  Future<void> renameRecording(BuildContext context, AllAudio recording) async {
-    TextEditingController controller =
-        TextEditingController(text: recording.filename);
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(
-            'Rename Recording',
-            style: GoogleFonts.poppins(
-                color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              labelText: 'New Name',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                'Cancel',
-                style: GoogleFonts.poppins(
-                    color: Colors.red, fontWeight: FontWeight.w400),
-              ),
-            ),
-            TextButton(
-              onPressed: () async {
-                String newName = controller.text.trim();
-
-                if (newName.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Name cannot be empty')),
-                  );
-                  return;
-                }
-
-                Navigator.pop(context); // Close the dialog
-
-                try {
-                  // API endpoint
-                  final String url =
-                      '${AppConfig.baseUrl}${EndPoints.renameFile}${recording.id}';
-
-                  // Request payload
-                  final Map<String, String> body = {
-                    "newName": newName,
-                  };
-
-                  // API call
-                  final response = await http.put(
-                    Uri.parse(url),
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: jsonEncode(body),
-                  );
-
-                  if (response.statusCode == 200) {
-                    // Update local filename and notify listeners
-                    recording.filename = newName;
-                    notifyListeners();
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Recording renamed successfully!')),
-                    );
-
-                    await fetchRecordings();
-                  } else {
-                    // Handle server errors
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                            'Failed to rename the recording. Status code: ${response.statusCode}'),
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  // Handle connection errors
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('An error occurred: ${e.toString()}'),
-                    ),
-                  );
-                }
-              },
-              child: Text(
-                'Rename',
-                style: GoogleFonts.poppins(
-                    color: Colors.black, fontWeight: FontWeight.w400),
-              ),
-            ),
-          ],
-        );
+    // API call
+    final response = await http.put(
+      Uri.parse(url),
+      headers: {
+        "Content-Type": "application/json",
       },
+      body: jsonEncode(body),
     );
+
+    if (response.statusCode == 200) {
+      return true; // Success
+    } else {
+      throw Exception(
+          'Failed to rename the recording. Status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('An error occurred: ${e.toString()}');
   }
+}
+
+  // Future<void> renameRecording(BuildContext context, AllAudio recording) async {
+  //   TextEditingController controller =
+  //       TextEditingController(text: recording.filename);
+
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return AlertDialog(
+  //         title: Text(
+  //           'Rename Recording',
+  //           style: GoogleFonts.poppins(
+  //               color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16),
+  //         ),
+  //         content: TextField(
+  //           controller: controller,
+  //           decoration: const InputDecoration(
+  //             labelText: 'New Name',
+  //             border: OutlineInputBorder(),
+  //           ),
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () => Navigator.pop(context),
+  //             child: Text(
+  //               'Cancel',
+  //               style: GoogleFonts.poppins(
+  //                   color: Colors.red, fontWeight: FontWeight.w400),
+  //             ),
+  //           ),
+  //           TextButton(
+  //             onPressed: () async {
+  //               String newName = controller.text.trim();
+
+  //               if (newName.isEmpty) {
+  //                 ScaffoldMessenger.of(context).showSnackBar(
+  //                   const SnackBar(content: Text('Name cannot be empty')),
+  //                 );
+  //                 return;
+  //               }
+
+  //               Navigator.pop(context); // Close the dialog
+
+  //               try {
+  //                 // API endpoint
+  //                 final String url =
+  //                     '${AppConfig.baseUrl}${EndPoints.renameFile}${recording.id}';
+
+  //                 // Request payload
+  //                 final Map<String, String> body = {
+  //                   "newName": newName,
+  //                 };
+
+  //                 // API call
+  //                 final response = await http.put(
+  //                   Uri.parse(url),
+  //                   headers: {
+  //                     "Content-Type": "application/json",
+  //                   },
+  //                   body: jsonEncode(body),
+  //                 );
+
+  //                 if (response.statusCode == 200) {
+  //                   // Update local filename and notify listeners
+  //                   recording.filename = newName;
+  //                   notifyListeners();
+
+  //                   ScaffoldMessenger.of(context).showSnackBar(
+  //                     const SnackBar(
+  //                         content: Text('Recording renamed successfully!')),
+  //                   );
+
+  //                   await fetchRecordings();
+  //                 } else {
+  //                   // Handle server errors
+  //                   ScaffoldMessenger.of(context).showSnackBar(
+  //                     SnackBar(
+  //                       content: Text(
+  //                           'Failed to rename the recording. Status code: ${response.statusCode}'),
+  //                     ),
+  //                   );
+  //                 }
+  //               } catch (e) {
+  //                 // Handle connection errors
+  //                 ScaffoldMessenger.of(context).showSnackBar(
+  //                   SnackBar(
+  //                     content: Text('An error occurred: ${e.toString()}'),
+  //                   ),
+  //                 );
+  //               }
+  //             },
+  //             child: Text(
+  //               'Rename',
+  //               style: GoogleFonts.poppins(
+  //                   color: Colors.black, fontWeight: FontWeight.w400),
+  //             ),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   Future<void> deleteRecording(BuildContext context, AllAudio recording) async {
     // Show confirmation dialog

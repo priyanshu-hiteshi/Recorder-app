@@ -1,10 +1,11 @@
 import 'package:chatapp/models/all_audios_model.dart';
+import 'package:chatapp/widgets/rename_dialog_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import '../provider/recorder_provider.dart';
-import '../provider/dialog_provider.dart';
+
 import 'player_screen.dart';
 
 class RecorderListScreen extends StatefulWidget {
@@ -83,7 +84,8 @@ class _RecorderListScreenState extends State<RecorderListScreen> {
                       icon: const Icon(Icons.more_vert, color: Colors.white),
                       onSelected: (value) {
                         if (value == 'Rename') {
-                          recorderProvider.renameRecording(context, recording);
+                          // recorderProvider.renameRecording(context, recording);
+                          showRenameModal(context, recorderProvider, recording) ; 
                         } else if (value == 'Delete') {
                           recorderProvider.deleteRecording(context, recording);
                         } else if (value == 'Generate') {
