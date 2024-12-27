@@ -41,6 +41,30 @@ class ApiService {
       throw Exception('Failed to update $e');
     }
   }
+
+  // static Future<Response> deleteRequest (
+  //   {required String endPoint ,
+  //    Map<String , String>? headers ,
+  //    Map<String , dynamic>? body}) async {
+  //      try {
+  //       String url = AppConfig.baseUrl + endPoint ; 
+
+  //       var response = await http.delete(Uri.parse(url)) ; 
+  //       if(response.statusCode==200){
+  //         return response ; 
+  //       }else {
+  //         print(response.body) ; 
+  //         throw Exception('Failed to delete') ; 
+  //       }
+  //      }catch(e){
+  //       throw Exception('failed to update $e') ; 
+  //      }
+  //    } 
+  
+
+ 
+
+
 }
 
 getHeaders() async {

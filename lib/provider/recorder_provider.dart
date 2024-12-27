@@ -6,6 +6,7 @@ import 'package:chatapp/helper/end_points.dart';
 import 'package:chatapp/helper/local_point.dart';
 import 'package:chatapp/helper/msg_helper.dart';
 import 'package:chatapp/models/all_audios_model.dart';
+import 'package:chatapp/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path_provider/path_provider.dart';
@@ -140,71 +141,116 @@ class RecorderProvider with ChangeNotifier {
     }
   }
 
-  Future<void> uploadRecordingToServer(String filePath, String title) async {
-  try {
-    // Create a multipart request
-    var request = http.MultipartRequest(
-      'POST',
-      Uri.parse('${AppConfig.baseUrl}${EndPoints.fileUpload}'),
-    );
+  //  Future<void> deleteSelectedRecordings(List<int> fileIds) async {
+  //   try {
+  //     final response = await ApiService.deleteRequest(
+  //       endPoint: "/api/file/deleteMultipleAudioFiles",
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: {"fileIds": fileIds},
+  //     );
 
-    // Add the file to the request
-    var file = await http.MultipartFile.fromPath(
-      'audioFile', // Key for the file in the request
-      filePath,
-    );
-    request.files.add(file);
+  //     if (response.statusCode == 200) {
+  //       // Remove deleted recordings locally
+  //       recordings.removeWhere((recording) => fileIds.contains(recording.id));
+  //       notifyListeners();
+  //     }
+  //   } catch (e) {
+  //     print("Failed to delete recordings: $e");
+  //     throw Exception("Failed to delete recordings");
+  //   }
+  // }
 
-    // Add additional fields to the request
-    request.fields['fileName'] = title;
-
-    // Send the request
-    var response = await request.send();
-
-    // Handle the response
-    if (response.statusCode == 200) {
-      print("File uploaded successfully!");
-    } else {
-      print("File upload failed with status: ${response.statusCode}");
-    }
-  } catch (e) {
-    print("Error uploading file: $e");
-    throw Exception("Failed to upload recording");
-  }
-}
-
-
- Future<void> saveRecordingWithTitleAndUpload(String title) async {
-  if (recordingFilePath != null) {
+  Future<void> deleteSelectedRecordings(List<int> fileIds) async {
     try {
-      // Save locally
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      List<String> recordings =
-          prefs.getStringList(LocalPoint.recordings) ?? [];
-      recordings.add('$title|$recordingFilePath');
-      await prefs.setStringList(LocalPoint.recordings, recordings);
+      final String url = '${AppConfig.baseUrl}${EndPoints.deleteMultipleFiles}';
 
-      print("Recordings saved locally: $recordings");
+      final Map<String, dynamic> body = {
+        "fileIds": fileIds,
+      };
 
-      // Upload to server
-      print("Uploading recording to server...");
-      await uploadRecordingToServer(recordingFilePath!, title);
-      print("Recording uploaded successfully!");
+      final response = await http.delete(
+        Uri.parse(url),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
+      );
 
-      // Reset recorder state
-      resetRecorderState();
-      print("Recorder state reset.");
+      if (response.statusCode == 200) {
+        print("Deleted successfully");
+         recordings.removeWhere((recording) => fileIds.contains(recording.id));
+        notifyListeners();
+      } else {
+        throw Exception('Failed to delete the files ${response.statusCode}');
+      }
     } catch (e) {
-      // Handle errors gracefully
-      print("Error in saving or uploading recording: $e");
-      throw Exception("Failed to save or upload recording.");
+      throw Exception('An error occurred ${e.toString()}');
     }
-  } else {
-    print("No recording file path available to save or upload.");
-    throw Exception("Recording file path is null.");
   }
-}
 
+  Future<void> uploadRecordingToServer(String filePath, String title) async {
+    try {
+      // Create a multipart request
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('${AppConfig.baseUrl}${EndPoints.fileUpload}'),
+      );
+
+      // Add the file to the request
+      var file = await http.MultipartFile.fromPath(
+        'audioFile', // Key for the file in the request
+        filePath,
+      );
+      request.files.add(file);
+
+      // Add additional fields to the request
+      request.fields['fileName'] = title;
+
+      // Send the request
+      var response = await request.send();
+
+      // Handle the response
+      if (response.statusCode == 200) {
+        print("File uploaded successfully!");
+      } else {
+        print("File upload failed with status: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error uploading file: $e");
+      throw Exception("Failed to upload recording");
+    }
+  }
+
+  Future<void> saveRecordingWithTitleAndUpload(String title) async {
+    if (recordingFilePath != null) {
+      try {
+        // Save locally
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        List<String> recordings =
+            prefs.getStringList(LocalPoint.recordings) ?? [];
+        recordings.add('$title|$recordingFilePath');
+        await prefs.setStringList(LocalPoint.recordings, recordings);
+
+        print("Recordings saved locally: $recordings");
+
+        // Upload to server
+        print("Uploading recording to server...");
+        await uploadRecordingToServer(recordingFilePath!, title);
+        print("Recording uploaded successfully!");
+
+        // Reset recorder state
+        resetRecorderState();
+        print("Recorder state reset.");
+      } catch (e) {
+        // Handle errors gracefully
+        print("Error in saving or uploading recording: $e");
+        throw Exception("Failed to save or upload recording.");
+      }
+    } else {
+      print("No recording file path available to save or upload.");
+      throw Exception("Recording file path is null.");
+    }
+  }
 
   Future<void> playRecording(String filePath) async {
     if (isPlaying) {
@@ -237,36 +283,36 @@ class RecorderProvider with ChangeNotifier {
     notifyListeners();
   }
 
-Future<bool> renameAudioFile(int recordingId, String newName) async {
-  try {
-    // API endpoint
-    final String url =
-        '${AppConfig.baseUrl}${EndPoints.renameFile}$recordingId';
+  Future<bool> renameAudioFile(int recordingId, String newName) async {
+    try {
+      // API endpoint
+      final String url =
+          '${AppConfig.baseUrl}${EndPoints.renameFile}$recordingId';
 
-    // Request payload
-    final Map<String, String> body = {
-      "newName": newName,
-    };
+      // Request payload
+      final Map<String, String> body = {
+        "newName": newName,
+      };
 
-    // API call
-    final response = await http.put(
-      Uri.parse(url),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode(body),
-    );
+      // API call
+      final response = await http.put(
+        Uri.parse(url),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
+      );
 
-    if (response.statusCode == 200) {
-      return true; // Success
-    } else {
-      throw Exception(
-          'Failed to rename the recording. Status code: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        return true; // Success
+      } else {
+        throw Exception(
+            'Failed to rename the recording. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('An error occurred: ${e.toString()}');
     }
-  } catch (e) {
-    throw Exception('An error occurred: ${e.toString()}');
   }
-}
 
   // Future<void> renameRecording(BuildContext context, AllAudio recording) async {
   //   TextEditingController controller =
