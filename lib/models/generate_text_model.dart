@@ -41,6 +41,7 @@ class GenerateSummary {
   String filename;
   String fileUrl;
   String summariesText;
+  String transcript ; 
   int speakers;
   DateTime createdAt;
   DateTime updatedAt;
@@ -50,6 +51,7 @@ class GenerateSummary {
     required this.filename,
     required this.fileUrl,
     required this.summariesText,
+    required this.transcript , 
     required this.speakers,
     required this.createdAt,
     required this.updatedAt,
@@ -61,6 +63,7 @@ class GenerateSummary {
         filename: json["filename"],
         fileUrl: json["fileUrl"],
         summariesText: json["summariesText"],
+        transcript : json["transcript"] , 
         speakers: json["speakers"],
         createdAt: DateTime.parse(json["createdAt"]),
         updatedAt: DateTime.parse(json["updatedAt"]),
@@ -71,6 +74,7 @@ class GenerateSummary {
         "filename": filename,
         "fileUrl": fileUrl,
         "summariesText": summariesText,
+        "transcript" : transcript , 
         "speakers": speakers,
         "createdAt": createdAt.toIso8601String(),
         "updatedAt": updatedAt.toIso8601String(),

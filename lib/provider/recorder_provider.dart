@@ -26,6 +26,7 @@ class RecorderProvider with ChangeNotifier {
   bool isRecording = false;
   bool isPaused = false;
   bool isPlaying = false;
+  bool isGenerated = false;
   int secondsElapsed = 0;
   String timerText = "00:00";
   Timer? _timer;
@@ -116,35 +117,35 @@ class RecorderProvider with ChangeNotifier {
   }
 
   Future<void> fetchRecordings() async {
-  isLoading = true; // Start loading
-  notifyListeners();
-
-  try {
-    final response = await http.get(
-      Uri.parse('${AppConfig.baseUrl}${EndPoints.fetchfiles}'),
-    );
-
-    if (response.statusCode == 200) {
-      final messageModel = MessageModel.fromJson(json.decode(response.body));
-      if (messageModel.success) {
-        _recordings = messageModel.allAudios;
-        print(messageModel.allAudios);
-      } else {
-        throw Exception("Failed to fetch recordings: ${messageModel.message}");
-      }
-    } else {
-      throw Exception(
-          "Failed to load recordings. Status: ${response.statusCode}");
-    }
-  } catch (e) {
-    print("Error fetching recordings: $e");
-    throw Exception("Error fetching recordings");
-  } finally {
-    isLoading = false; // Stop loading
+    isLoading = true; // Start loading
     notifyListeners();
-  }
-}
 
+    try {
+      final response = await http.get(
+        Uri.parse('${AppConfig.baseUrl}${EndPoints.fetchfiles}'),
+      );
+
+      if (response.statusCode == 200) {
+        final messageModel = MessageModel.fromJson(json.decode(response.body));
+        if (messageModel.success) {
+          _recordings = messageModel.allAudios;
+          print(messageModel.allAudios);
+        } else {
+          throw Exception(
+              "Failed to fetch recordings: ${messageModel.message}");
+        }
+      } else {
+        throw Exception(
+            "Failed to load recordings. Status: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error fetching recordings: $e");
+      throw Exception("Error fetching recordings");
+    } finally {
+      isLoading = false; // Stop loading
+      notifyListeners();
+    }
+  }
 
   //  Future<void> deleteSelectedRecordings(List<int> fileIds) async {
   //   try {
@@ -183,7 +184,7 @@ class RecorderProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         print("Deleted successfully");
-         recordings.removeWhere((recording) => fileIds.contains(recording.id));
+        recordings.removeWhere((recording) => fileIds.contains(recording.id));
         notifyListeners();
       } else {
         throw Exception('Failed to delete the files ${response.statusCode}');
@@ -499,82 +500,31 @@ class RecorderProvider with ChangeNotifier {
     BuildContext context,
     AllAudio recording,
   ) async {
-    // Show loading dialog with Lottie animation
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) => Center(
-        child: Lottie.asset(
-          'assets/animations/r.json',
-          width: 250,
-          height: 250,
-        ),
-      ),
-    );
-
     try {
+      
+
       final response = await http.get(
         Uri.parse(
           '${AppConfig.baseUrl}${EndPoints.generateSummary}${recording.id}',
         ),
       );
 
-      Navigator.pop(context); // Close the loading dialog
-
       if (response.statusCode == 200) {
         if (response.body.isNotEmpty) {
+          isGenerated = true  ; 
+          notifyListeners() ; 
           final decodedJson = json.decode(response.body);
 
           if (decodedJson != null && decodedJson is Map<String, dynamic>) {
             final messageModel = GenerateTextMessage.fromJson(decodedJson);
 
-            // Show modal dialog with the generated text
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: Text(
-                  'Generated Summary',
-                  style: GoogleFonts.poppins(
-                      color: Colors.black, fontWeight: FontWeight.bold),
-                ),
-                content: SingleChildScrollView(
-                  
-                  child: Column(
-                    
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start, // Align text to the left
-                    children: [
-                      Text(
-                        messageModel.generateSummary.summariesText,
-                      
-                        style: GoogleFonts.poppins(
-                          // Use any Google font here
-                          color: Colors.black,
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                      const SizedBox(
-                          height: 10), // Add spacing between the texts
-                      Text(
-                        'Number of Speakers: ${messageModel.generateSummary.speakers}',
-                        style: GoogleFonts.poppins(
-                            color: Colors.black, fontWeight: FontWeight.w700),
-                      ),
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      'OK',
-                      style: GoogleFonts.poppins(
-                          color: Colors.black, fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                ],
-              ),
-            );
+            
+            print(
+                'Generated summary: ${messageModel.generateSummary.transcript}');
+            print(
+                'Number of Speakers: ${messageModel.generateSummary.speakers}');
+
+            
           } else {
             print('Invalid JSON format');
             showSnackBar(context, 'Failed to parse response data');
@@ -584,7 +534,7 @@ class RecorderProvider with ChangeNotifier {
           showSnackBar(context, 'No data received');
         }
 
-        await fetchRecordings();
+        // await fetchRecordings();
       } else {
         print('Failed to generate data. Status code: ${response.statusCode}');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -605,42 +555,40 @@ class RecorderProvider with ChangeNotifier {
   }
 
   Future<void> showSummary(BuildContext context, AllAudio recording) async {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text(
-        'Summary',
-        style: GoogleFonts.poppins(
-            color: Colors.black, fontWeight: FontWeight.bold),
-      ),
-      content: Container(
-        height: 200.0, // Set height
-        width: 400.0,  // Set width
-        child: SingleChildScrollView(
-          child: Text(
-            recording.summariesText,
-           
-            style: GoogleFonts.poppins(
-              color: Colors.black,
-              fontWeight: FontWeight.w300,
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Summary',
+          style: GoogleFonts.poppins(
+              color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+        content: Container(
+          height: 200.0, // Set height
+          width: 400.0, // Set width
+          child: SingleChildScrollView(
+            child: Text(
+              recording.summariesText,
+              style: GoogleFonts.poppins(
+                color: Colors.black,
+                fontWeight: FontWeight.w300,
+              ),
             ),
           ),
         ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(
-            'Close',
-            style: GoogleFonts.poppins(
-                color: Colors.black, fontWeight: FontWeight.w500),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Close',
+              style: GoogleFonts.poppins(
+                  color: Colors.black, fontWeight: FontWeight.w500),
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-}
-
+        ],
+      ),
+    );
+  }
 
   @override
   void dispose() {

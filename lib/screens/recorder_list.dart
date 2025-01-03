@@ -123,6 +123,7 @@ class _RecorderListScreenState extends State<RecorderListScreen> {
                         builder: (context) => PlayerScreen(
                           filePath: recording.fileUrl,
                           fileName: recording.filename,
+                          recording: recording,
                         ),
                       ),
                     );
