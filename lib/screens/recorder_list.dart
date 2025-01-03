@@ -25,6 +25,10 @@ class _RecorderListScreenState extends State<RecorderListScreen> {
     recorderProvider.fetchRecordings();
   }
 
+  void Loader() {
+    
+  }
+
   void toggleSelectionMode(bool enable) {
     setState(() {
       isSelectionMode = enable;
@@ -80,6 +84,16 @@ class _RecorderListScreenState extends State<RecorderListScreen> {
       backgroundColor: Colors.black,
       body: Consumer<RecorderProvider>(
         builder: (context, recorderProvider, child) {
+        if (recorderProvider.isLoading) {
+          return Center(
+            child: CircularProgressIndicator(
+              color: Colors.grey[300],
+            ),
+          );
+        }
+
+
+
           final recordings = recorderProvider.recordings;
 
           if (recordings.isEmpty) {
@@ -149,7 +163,9 @@ class _RecorderListScreenState extends State<RecorderListScreen> {
                               } else if (value == 'Delete') {
                                 recorderProvider.deleteRecording(
                                     context, recording);
-                              } else if (value == 'Generate') {
+                              }
+
+                               else if (value == 'Generate') {
                                 recorderProvider.generateRecordingData(
                                     context, recording);
                               } else if (value == 'Show') {

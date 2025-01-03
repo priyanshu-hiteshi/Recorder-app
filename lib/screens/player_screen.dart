@@ -20,12 +20,12 @@ class PlayerScreen extends StatelessWidget {
         appBar: AppBar(
           title: Text(
             fileName,
-             style: GoogleFonts.poppins(
-              color: Colors.white, fontWeight: FontWeight.bold),
+            style: GoogleFonts.poppins(
+                color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 18),
           ),
           backgroundColor: Colors.black,
           elevation: 1,
-          iconTheme: const IconThemeData(color: Colors.white),
+          iconTheme: const IconThemeData(color: Colors.grey),
         ),
         body: Consumer<PlayerProvider>(
           builder: (context, provider, child) {
@@ -37,28 +37,24 @@ class PlayerScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Lottie Animation at the center (only visible when playing)
-                      provider.isPlaying
-                          ? Lottie.asset(
-                              'assets/animations/player.json', 
-                              width: 150,
-                              height: 150,
-                              fit: BoxFit.contain,
-                            )
-                          : const SizedBox(), // Empty when not playing
-
-                      // Playback Controls
+                      provider.isPlaying ? 
+                      Lottie.asset(
+                        'assets/animations/player.json',
+                        width: 150,
+                        height: 150,
+                        fit: BoxFit.contain,
+                      ) : SizedBox() , 
+                      // Icon(Icons.text_decrease_outlined , color: Colors.white,) , 
+                      // Image.asset('assets/animations/speech-synthesis.png' , width: 60, height: 60, fit: BoxFit.contain,) , 
+                      // TextButton(onPressed: , child: Text("Generate")),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [],
                       ),
-
                       const SizedBox(height: 20),
                     ],
                   ),
                 ),
-
-              
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Column(
@@ -73,7 +69,7 @@ class PlayerScreen extends StatelessWidget {
                         inactiveColor: Colors.grey.shade300,
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -99,8 +95,8 @@ class PlayerScreen extends StatelessWidget {
                         onTap: () => provider.playPause(filePath),
                         child: Container(
                           margin: const EdgeInsets.only(bottom: 40),
-                          width: 60, // Adjust size for the circular button
-                          height: 60,
+                          width: 40, // Adjust size for the circular button
+                          height: 40,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: provider.isPlaying
@@ -112,7 +108,7 @@ class PlayerScreen extends StatelessWidget {
                               provider.isPlaying
                                   ? Icons.pause
                                   : Icons.play_arrow,
-                              size: 40, // Icon size
+                              size: 25, // Icon size
                               color: Colors.white, // Icon color
                             ),
                           ),
@@ -121,7 +117,6 @@ class PlayerScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 Align(
                   alignment: Alignment
                       .bottomCenter, // Align to the bottom-center of the screen

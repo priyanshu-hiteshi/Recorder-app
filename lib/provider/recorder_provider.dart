@@ -116,30 +116,35 @@ class RecorderProvider with ChangeNotifier {
   }
 
   Future<void> fetchRecordings() async {
-    try {
-      final response = await http.get(
-        Uri.parse('${AppConfig.baseUrl}${EndPoints.fetchfiles}'),
-      );
+  isLoading = true; // Start loading
+  notifyListeners();
 
-      if (response.statusCode == 200) {
-        final messageModel = MessageModel.fromJson(json.decode(response.body));
-        if (messageModel.success) {
-          _recordings = messageModel.allAudios;
-          print(messageModel.allAudios);
-          notifyListeners();
-        } else {
-          throw Exception(
-              "Failed to fetch recordings: ${messageModel.message}");
-        }
+  try {
+    final response = await http.get(
+      Uri.parse('${AppConfig.baseUrl}${EndPoints.fetchfiles}'),
+    );
+
+    if (response.statusCode == 200) {
+      final messageModel = MessageModel.fromJson(json.decode(response.body));
+      if (messageModel.success) {
+        _recordings = messageModel.allAudios;
+        print(messageModel.allAudios);
       } else {
-        throw Exception(
-            "Failed to load recordings. Status: ${response.statusCode}");
+        throw Exception("Failed to fetch recordings: ${messageModel.message}");
       }
-    } catch (e) {
-      print("Error fetching recordings: $e");
-      throw Exception("Error fetching recordings");
+    } else {
+      throw Exception(
+          "Failed to load recordings. Status: ${response.statusCode}");
     }
+  } catch (e) {
+    print("Error fetching recordings: $e");
+    throw Exception("Error fetching recordings");
+  } finally {
+    isLoading = false; // Stop loading
+    notifyListeners();
   }
+}
+
 
   //  Future<void> deleteSelectedRecordings(List<int> fileIds) async {
   //   try {
@@ -533,12 +538,15 @@ class RecorderProvider with ChangeNotifier {
                       color: Colors.black, fontWeight: FontWeight.bold),
                 ),
                 content: SingleChildScrollView(
+                  
                   child: Column(
+                    
                     crossAxisAlignment:
                         CrossAxisAlignment.start, // Align text to the left
                     children: [
                       Text(
                         messageModel.generateSummary.summariesText,
+                      
                         style: GoogleFonts.poppins(
                           // Use any Google font here
                           color: Colors.black,
@@ -597,35 +605,42 @@ class RecorderProvider with ChangeNotifier {
   }
 
   Future<void> showSummary(BuildContext context, AllAudio recording) async {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Summary',
-          style: GoogleFonts.poppins(
-              color: Colors.black, fontWeight: FontWeight.bold),
-        ),
-        content: Text(
-          recording.summariesText,
-          style: GoogleFonts.poppins(
-            // Use any Google font here
-            color: Colors.black,
-            fontWeight: FontWeight.w300,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Close',
-              style: GoogleFonts.poppins(
-                  color: Colors.black, fontWeight: FontWeight.w500),
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(
+        'Summary',
+        style: GoogleFonts.poppins(
+            color: Colors.black, fontWeight: FontWeight.bold),
+      ),
+      content: Container(
+        height: 200.0, // Set height
+        width: 400.0,  // Set width
+        child: SingleChildScrollView(
+          child: Text(
+            recording.summariesText,
+           
+            style: GoogleFonts.poppins(
+              color: Colors.black,
+              fontWeight: FontWeight.w300,
             ),
           ),
-        ],
+        ),
       ),
-    );
-  }
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(
+            'Close',
+            style: GoogleFonts.poppins(
+                color: Colors.black, fontWeight: FontWeight.w500),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 
   @override
   void dispose() {

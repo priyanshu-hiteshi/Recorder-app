@@ -21,13 +21,15 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+  // static const themeMode = ThemeMode.system ; 
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Recorder',
-      darkTheme: ThemeData.dark(),
+      // darkTheme: ThemeData.dark(),
+
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
         useMaterial3: true,
