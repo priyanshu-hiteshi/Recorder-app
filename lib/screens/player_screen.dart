@@ -1,3 +1,4 @@
+import 'package:chatapp/models/generate_text_model.dart';
 import 'package:chatapp/provider/recorder_provider.dart';
 import 'package:chatapp/widgets/animated_button.dart';
 import 'package:flutter/material.dart';
@@ -6,16 +7,19 @@ import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart'; // Import Lottie package
 import '../provider/player_provider.dart';
 import '../models/all_audios_model.dart';
+import 'dart:ui';
 
 class PlayerScreen extends StatefulWidget {
   final String filePath;
   final String fileName;
   final AllAudio recording;
+  // final GenerateSummary generateSummary ;
 
   const PlayerScreen({
     required this.filePath,
     required this.fileName,
     required this.recording,
+    // required this.generateSummary ,
     Key? key,
   }) : super(key: key);
 
@@ -24,15 +28,16 @@ class PlayerScreen extends StatefulWidget {
 }
 
 class _PlayerScreenState extends State<PlayerScreen> {
-  String _transcript = "";  // To store the transcript
-  String _summary = "";     // To store the summary
-
+  String _transcript = "";
+  String _summary = "";
+  bool clickeOrnot = false;
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => PlayerProvider()),
-        ChangeNotifierProvider(create: (_) => RecorderProvider()), // Add RecorderProvider
+        ChangeNotifierProvider(
+            create: (_) => RecorderProvider()), // Add RecorderProvider
       ],
       child: Scaffold(
         backgroundColor: Colors.black,
@@ -43,14 +48,16 @@ class _PlayerScreenState extends State<PlayerScreen> {
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                widget.fileName,
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
+              Flexible(
+                child: Text(
+                  widget.fileName,
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
               const Spacer(),
               AnimatedGradientButton(
@@ -72,13 +79,18 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       GestureDetector(
                         onTap: () {
                           setState(() {
-                            _transcript = "gygygygygyg yfgyfyfyf yfyfyfyf yfyfyfyfyfygguyggy yfyfytfdfyfyfyfygyygyg yfgyffyfyfyf yfyfygbgygy yfyfyfygygbyvy yfyfyfy"; // Assuming recorderProvider has a transcript
-                            _summary = ""; // Clear summary if transcript is clicked
+                            _transcript =
+                                recorderProvider.transcriptFromprovider!.isEmpty
+                                    ? "Transcription not found"
+                                    : recorderProvider.transcriptFromprovider!;
+                            _summary = "";
+                            clickeOrnot = true;
                           });
                         },
                         child: Container(
                           margin: EdgeInsets.only(top: 10.3),
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -87,7 +99,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
                             style: GoogleFonts.poppins(
                               color: Colors.grey,
                               fontWeight: FontWeight.w500,
-                              decoration: TextDecoration.underline,
+                              decoration: _transcript.isNotEmpty && clickeOrnot
+                                  ? TextDecoration.underline
+                                  : TextDecoration.none,
                               decorationColor: Colors.white,
                             ),
                           ),
@@ -97,12 +111,18 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       GestureDetector(
                         onTap: () {
                           setState(() {
-                            _summary = "gugugugugugugugugu ugugugu ugugugugugu ugugugugugugugu  gugugugugugugu ugugugugugugugu ugugu ugu"; // Assuming recorderProvider has a summary
-                            _transcript = ""; // Clear transcript if summary is clicked
+                            _summary = (recorderProvider
+                                        .summaryFromprovider!.isNotEmpty &&
+                                    recorderProvider.isGenerated
+                                ? recorderProvider.summaryFromprovider
+                                : "Summary not found")!;
+                            _transcript = "";
+                            clickeOrnot = true;
                           });
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -111,6 +131,10 @@ class _PlayerScreenState extends State<PlayerScreen> {
                             style: GoogleFonts.poppins(
                               color: Colors.grey,
                               fontWeight: FontWeight.w500,
+                              decoration: _transcript.isEmpty && clickeOrnot
+                                  ? TextDecoration.underline
+                                  : TextDecoration.none,
+                              decorationColor: Colors.white,
                             ),
                           ),
                         ),
@@ -119,23 +143,57 @@ class _PlayerScreenState extends State<PlayerScreen> {
                   ),
                 ],
                 // Scrollable container for the transcript/summary
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    height: 200,  // Adjust height as needed
-                    padding: const EdgeInsets.all(16),
-                    child: SingleChildScrollView(
-                      child: Text(
-                        _transcript.isNotEmpty ? _transcript : _summary, // Show either transcript or summary
-                        style: GoogleFonts.poppins(color: Colors.black, fontSize: 14),
-                      ),
-                    ),
-                  ),
-                ),
+                recorderProvider.isGenerated && clickeOrnot
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 20),
+                        margin: const EdgeInsets.fromLTRB(20, 60, 20, 1),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade200.withOpacity(
+                                    0.1), // Adjust opacity for glass effect
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              height: 400, // Adjust height as needed
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: SingleChildScrollView(
+                                      child: Text(
+                                        _transcript.isNotEmpty
+                                            ? _transcript
+                                            : _summary, // Show either transcript or summary
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16), // Add spacing
+                                  Text(
+                                    'Number of Speakers: ${recorderProvider.numberOfspeackers}',
+                                    style: GoogleFonts.poppins(
+                                      color: const Color.fromARGB(
+                                              255, 177, 176, 176)
+                                          .withOpacity(0.8),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    : Text(" "),
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Column(
@@ -156,15 +214,19 @@ class _PlayerScreenState extends State<PlayerScreen> {
                           children: [
                             Text(
                               playerProvider.currentPosition != null
-                                  ? _formatDuration(playerProvider.currentPosition!)
+                                  ? _formatDuration(
+                                      playerProvider.currentPosition!)
                                   : "00:00",
-                              style: const TextStyle(fontSize: 14, color: Colors.grey),
+                              style: const TextStyle(
+                                  fontSize: 14, color: Colors.grey),
                             ),
                             Text(
                               playerProvider.totalDuration != null
-                                  ? _formatDuration(playerProvider.totalDuration!)
+                                  ? _formatDuration(
+                                      playerProvider.totalDuration!)
                                   : "00:00",
-                              style: const TextStyle(fontSize: 14, color: Colors.grey),
+                              style: const TextStyle(
+                                  fontSize: 14, color: Colors.grey),
                             ),
                           ],
                         ),
@@ -174,8 +236,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
                         onTap: () => playerProvider.playPause(widget.filePath),
                         child: Container(
                           margin: const EdgeInsets.only(bottom: 40),
-                          width: 40,
-                          height: 40,
+                          width: 60,
+                          height: 60,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: playerProvider.isPlaying
@@ -187,7 +249,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                               playerProvider.isPlaying
                                   ? Icons.pause
                                   : Icons.play_arrow,
-                              size: 25,
+                              size: 35,
                               color: Colors.white,
                             ),
                           ),
@@ -196,6 +258,57 @@ class _PlayerScreenState extends State<PlayerScreen> {
                     ],
                   ),
                 ),
+                Align(
+                  alignment: Alignment
+                      .bottomCenter, // Align to the bottom-center of the screen
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        bottom: 40), // Margin from the bottom
+                    child: Stack(
+                      children: [
+                        Positioned(
+                          right: 16,
+                          bottom: 16,
+                          child: PopupMenuButton<double>(
+                            onSelected: (speed) =>
+                                playerProvider.setPlaybackSpeed(speed),
+                            itemBuilder: (context) => [
+                              const PopupMenuItem(
+                                value: 0.5,
+                                child: Text("0.5x"),
+                              ),
+                              const PopupMenuItem(
+                                value: 1.0,
+                                child: Text("1.0x"),
+                              ),
+                              const PopupMenuItem(
+                                value: 1.5,
+                                child: Text("1.5x"),
+                              ),
+                              const PopupMenuItem(
+                                value: 2.0,
+                                child: Text("2.0x"),
+                              ),
+                            ],
+                            child: Row(
+                              children: [
+                                Text(
+                                  "${playerProvider.speed}x",
+                                  style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Color.fromARGB(255, 249, 22, 14),
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                const Icon(Icons.arrow_drop_down,
+                                    color: Color.fromARGB(255, 249, 22, 14)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
               ],
             );
           },

@@ -15,24 +15,30 @@ class SaveRecordingModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: Colors.grey[800], // Set the background color to dark gray
+      backgroundColor: Colors.grey.shade200
+          .withOpacity(0.1), // Set the background color to dark gray
       title: const Text(
         "Save Recording",
-        style: TextStyle(color: Colors.white), // White text for title to match dark background
+        style: TextStyle(
+            color:
+                Colors.white), // White text for title to match dark background
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: titleController,
-            style: const TextStyle(color: Colors.white), // White text in the input field
+            style: const TextStyle(
+                color: Colors.white), // White text in the input field
             decoration: const InputDecoration(
               labelText: "Title",
               labelStyle: TextStyle(color: Colors.white), // White label text
               hintText: "Enter a title for the recording",
-              hintStyle: TextStyle(color: Colors.white60), // Lighter gray hint text
+              hintStyle:
+                  TextStyle(color: Colors.white60), // Lighter gray hint text
               focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.white), // White underline when focused
+                borderSide: BorderSide(
+                    color: Colors.white), // White underline when focused
               ),
             ),
           ),
@@ -54,10 +60,13 @@ class SaveRecordingModal extends StatelessWidget {
               ),
               child: const Text(
                 "Cancel",
-                style: TextStyle(color: Colors.white ,fontWeight: FontWeight.bold ), // White text on red background
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight:
+                        FontWeight.bold), // White text on red background
               ),
             ),
-            
+
             // Save button
             TextButton(
               onPressed: onSave,
@@ -65,10 +74,7 @@ class SaveRecordingModal extends StatelessWidget {
                 Icons.bookmark_outline,
                 color: Colors.white, // White icon to match dark background
               ),
-               
             ),
-
-            
           ],
         ),
       ],

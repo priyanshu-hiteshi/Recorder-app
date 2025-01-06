@@ -23,6 +23,9 @@ class RecorderProvider with ChangeNotifier {
   FlutterSoundRecorder? _recorder;
   FlutterSoundPlayer? _player;
   String? recordingFilePath;
+  String? transcriptFromprovider  ;
+  String? summaryFromprovider ; 
+  int?numberOfspeackers ; 
   bool isRecording = false;
   bool isPaused = false;
   bool isPlaying = false;
@@ -65,6 +68,7 @@ class RecorderProvider with ChangeNotifier {
     try {
       final hasPermission = await _checkMicrophonePermission();
       if (!hasPermission) {
+        
         return;
       }
 
@@ -204,7 +208,7 @@ class RecorderProvider with ChangeNotifier {
 
       // Add the file to the request
       var file = await http.MultipartFile.fromPath(
-        'audioFile', // Key for the file in the request
+        'audioFile', 
         filePath,
       );
       request.files.add(file);
@@ -310,7 +314,9 @@ class RecorderProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
+         fetchRecordings() ; 
         return true; // Success
+        
       } else {
         throw Exception(
             'Failed to rename the recording. Status code: ${response.statusCode}');
@@ -501,8 +507,8 @@ class RecorderProvider with ChangeNotifier {
     AllAudio recording,
   ) async {
     try {
-      
-
+       
+       isLoading = true ; 
       final response = await http.get(
         Uri.parse(
           '${AppConfig.baseUrl}${EndPoints.generateSummary}${recording.id}',
@@ -512,13 +518,15 @@ class RecorderProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         if (response.body.isNotEmpty) {
           isGenerated = true  ; 
+          isLoading = false ; 
           notifyListeners() ; 
           final decodedJson = json.decode(response.body);
 
           if (decodedJson != null && decodedJson is Map<String, dynamic>) {
             final messageModel = GenerateTextMessage.fromJson(decodedJson);
-
-            
+            transcriptFromprovider  = messageModel.generateSummary.transcript ; 
+            summaryFromprovider = messageModel.generateSummary.summariesText ; 
+            numberOfspeackers = messageModel.generateSummary.speakers ; 
             print(
                 'Generated summary: ${messageModel.generateSummary.transcript}');
             print(
@@ -536,6 +544,7 @@ class RecorderProvider with ChangeNotifier {
 
         // await fetchRecordings();
       } else {
+        isLoading = false ; 
         print('Failed to generate data. Status code: ${response.statusCode}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -546,6 +555,7 @@ class RecorderProvider with ChangeNotifier {
         );
       }
     } catch (e) {
+      isLoading = false ; 
       print('An error occurred: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

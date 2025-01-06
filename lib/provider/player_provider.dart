@@ -34,7 +34,7 @@ class PlayerProvider extends ChangeNotifier {
       // Start or resume playback
       print("${AppConfig.baseUrl}" + filePath);
       await _player.startPlayer(
-        fromURI: "${AppConfig.baseUrl}" + filePath,
+        fromURI: "${AppConfig.baseUrl}$filePath",
         codec: Codec.defaultCodec,
         whenFinished: () {
           isPlaying = false;

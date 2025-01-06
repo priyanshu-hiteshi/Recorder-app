@@ -1,3 +1,4 @@
+import 'package:chatapp/models/generate_text_model.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +17,9 @@ class RecorderListScreen extends StatefulWidget {
 class _RecorderListScreenState extends State<RecorderListScreen> {
   List<int> selectedAudios = [];
   bool isSelectionMode = false;
+  // GenerateSummary?  generateSummary ; 
+  
+
 
   @override
   void initState() {
@@ -25,14 +29,12 @@ class _RecorderListScreenState extends State<RecorderListScreen> {
     recorderProvider.fetchRecordings();
   }
 
-  void Loader() {
-    
-  }
+  void Loader() {}
 
   void toggleSelectionMode(bool enable) {
     setState(() {
       isSelectionMode = enable;
-      if (!enable) selectedAudios.clear(); 
+      if (!enable) selectedAudios.clear();
     });
   }
 
@@ -60,7 +62,7 @@ class _RecorderListScreenState extends State<RecorderListScreen> {
               ? '${selectedAudios.length}    Selected'
               : 'Recordings',
           style: GoogleFonts.poppins(
-              color: Colors.white, fontWeight: FontWeight.bold , fontSize:16 ),
+              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
         ),
         actions: isSelectionMode
             ? [
@@ -68,8 +70,8 @@ class _RecorderListScreenState extends State<RecorderListScreen> {
                   icon: const Icon(Icons.delete, color: Colors.red),
                   onPressed: () async {
                     if (selectedAudios.isNotEmpty) {
-                      await recorderProvider.deleteSelectedRecordings(
-                          selectedAudios);
+                      await recorderProvider
+                          .deleteSelectedRecordings(selectedAudios);
                       toggleSelectionMode(false); // Exit selection mode
                     }
                   },
@@ -84,15 +86,13 @@ class _RecorderListScreenState extends State<RecorderListScreen> {
       backgroundColor: Colors.black,
       body: Consumer<RecorderProvider>(
         builder: (context, recorderProvider, child) {
-        if (recorderProvider.isLoading) {
-          return Center(
-            child: CircularProgressIndicator(
-              color: Colors.grey[300],
-            ),
-          );
-        }
-
-
+          if (recorderProvider.isLoading) {
+            return Center(
+              child: CircularProgressIndicator(
+                color: Colors.grey[300],
+              ),
+            );
+          }
 
           final recordings = recorderProvider.recordings;
 
@@ -124,25 +124,31 @@ class _RecorderListScreenState extends State<RecorderListScreen> {
                           filePath: recording.fileUrl,
                           fileName: recording.filename,
                           recording: recording,
+                          // generateSummary: ,
+                          
                         ),
                       ),
                     );
                   }
                 },
                 child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? const Color.fromARGB(255, 13, 13, 14).withOpacity(0.3)
                         : Colors.black,
                     borderRadius: BorderRadius.circular(10.0),
                     border: isSelected
-                        ? Border.all(color: const Color.fromARGB(255, 116, 116, 117), width: 2)
+                        ? Border.all(
+                            color: const Color.fromARGB(255, 116, 116, 117),
+                            width: 2)
                         : null,
                   ),
                   child: ListTile(
-                    leading: const CircleAvatar(
-                      backgroundColor: Color.fromRGBO(248, 141, 141, 1),
+                    leading:  CircleAvatar(
+                      backgroundColor: Colors.grey.shade200.withOpacity(0.1),
+                      // backgroundColor: Color.fromRGBO(248, 141, 141, 1)
                       child: Icon(Icons.audiotrack, color: Colors.white),
                     ),
                     title: Text(
@@ -154,46 +160,54 @@ class _RecorderListScreenState extends State<RecorderListScreen> {
                       ),
                     ),
                     trailing: !isSelectionMode
-                        ? PopupMenuButton<String>(
-                            icon: const Icon(Icons.more_vert,
-                                color: Colors.white),
-                            onSelected: (value) {
-                              if (value == 'Rename') {
-                                showRenameModal(
-                                    context, recorderProvider, recording);
-                              } else if (value == 'Delete') {
-                                recorderProvider.deleteRecording(
-                                    context, recording);
-                              }
+                        ? PopupMenuTheme(
+                            data: PopupMenuThemeData(
+                              color: Colors.grey.shade200.withOpacity(
+                                  0.1), // Background color with opacity
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                    12), // Rounded corners
+                              ),
+                              
+                              textStyle: TextStyle(
+                                color: Colors.white, // Text color for all items
+                              ),
+                            ),
+                            child: PopupMenuButton<String>(
+                              icon: const Icon(Icons.more_vert,
+                                  color: Colors.white),
+                              onSelected: (value) {
+                                if (value == 'Rename') {
+                                  showRenameModal(
+                                      context, recorderProvider, recording);
+                                } else if (value == 'Delete') {
+                                  recorderProvider.deleteRecording(
+                                      context, recording);
+                                }
+                              },
 
-                               else if (value == 'Generate') {
-                                recorderProvider.generateRecordingData(
-                                    context, recording);
-                              } else if (value == 'Show') {
-                                recorderProvider.showSummary(
-                                    context, recording);
-                              }
-                            },
-                            itemBuilder: (context) => [
-                              const PopupMenuItem(
-                                value: 'Rename',
-                                child: Text('Rename'),
-                              ),
-                              const PopupMenuItem(
-                                value: 'Delete',
-                                child: Text('Delete'),
-                              ),
-                              PopupMenuItem(
-                                value: recording.summariesText.isNotEmpty
-                                    ? 'Show'
-                                    : 'Generate',
-                                child: Text(
-                                  recording.summariesText.isNotEmpty
-                                      ? 'Show Summary'
-                                      : 'Generate',
+                              offset: const Offset(0, 0),
+                              itemBuilder: (context) => [
+                                PopupMenuItem(
+                                  value: 'Rename',
+                                  child: Text('Rename',
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.white,
+                                        // fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      )),
                                 ),
-                              ),
-                            ],
+                                PopupMenuItem(
+                                  value: 'Delete',
+                                  child: Text('Delete',
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.red,
+                                        // fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      )),
+                                ),
+                              ],
+                            ),
                           )
                         : null,
                   ),
