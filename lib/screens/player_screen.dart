@@ -80,7 +80,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                         onTap: () {
                           setState(() {
                             _transcript =
-                                recorderProvider.transcriptFromprovider!.isEmpty
+                                recorderProvider.transcriptFromprovider==null  
                                     ? "Transcription not found"
                                     : recorderProvider.transcriptFromprovider!;
                             _summary = "";

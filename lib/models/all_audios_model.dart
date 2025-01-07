@@ -39,7 +39,7 @@ class AllAudio {
     String filename;
     String fileUrl;
     String summariesText;
-    String transcript ; 
+    String? transcript ; 
     int? speakers;
     DateTime createdAt;
     DateTime updatedAt;

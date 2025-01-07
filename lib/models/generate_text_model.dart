@@ -41,8 +41,8 @@ class GenerateSummary {
   String filename;
   String fileUrl;
   String summariesText;
-  String transcript ; 
-  int speakers;
+  String? transcript ; 
+  int? speakers;
   DateTime createdAt;
   DateTime updatedAt;
 

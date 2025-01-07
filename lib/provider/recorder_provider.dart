@@ -122,7 +122,7 @@ class RecorderProvider with ChangeNotifier {
 
   Future<void> fetchRecordings() async {
     isLoading = true; // Start loading
-    notifyListeners();
+    // notifyListeners();
 
     try {
       final response = await http.get(
